@@ -1,0 +1,34 @@
+.banner{
+  height:450px;
+  background:linear-gradient(
+    135deg,
+    var(--primary),
+    var(--secondary)
+  );
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  text-align:center;
+}
+
+.banner button{
+  margin-top:15px;
+  padding:10px 20px;
+  border:none;
+  background:var(--cta);
+  color:white;
+  font-weight: 600;
+  border-radius:6px;
+  cursor:pointer;
+  transition: all 0.25s;
+}
+
+.banner button:hover {
+  background: var(--secondary);
+  transform: translateY(-1px);
+}
+
+.banner button:focus {
+  outline: none;
+}

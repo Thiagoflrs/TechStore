@@ -1,0 +1,49 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependências
+node_modules
+
+# Build
+dist
+dist-ssr
+
+# Arquivos locais
+*.local
+
+# Variáveis de ambiente
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos do Visual Studio
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Arquivos temporários
+*.sw?
+*.tmp
+*.temp
+
+# Cobertura de testes
+coverage/
