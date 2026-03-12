@@ -1,0 +1,99 @@
+.container{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  }
+  
+  .card{
+  background:white;
+  border-radius:12px;
+  box-shadow:0 8px 25px rgba(0,0,0,0.15);
+  }
+  
+  .layout{
+  display:flex;
+  width:850px;
+  min-height:450px;
+  }
+  
+  .lado-esquerdo{
+  width:250px;
+  background:#1a3c8b;
+  color:white;
+  padding:30px;
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  border-radius:12px 0 0 12px;
+  }
+  
+  .lado-esquerdo h2{
+  margin-bottom:20px;
+  }
+  
+  .lado-direito{
+  flex:1;
+  padding:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  }
+  
+  .botao{
+  padding:14px;
+  border:none;
+  border-radius:8px;
+  background:white;
+  color:#1a3c8b;
+  font-weight:bold;
+  cursor:pointer;
+  
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  }
+  
+  .botao:hover{
+  background:#dfe6ff;
+  }
+  
+  .icone{
+  font-size:18px;
+  }
+  
+  .info{
+  width:300px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  text-align:center;
+  }
+  
+  input,select{
+  padding:12px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  font-size:14px;
+  }
+  
+  .confirmar{
+  margin-top:10px;
+  padding:14px;
+  border:none;
+  border-radius:8px;
+  background:#1a3c8b;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  }
+  
+  .confirmar:hover{
+  background:#0f2b66;
+  }
+  
+  .qrcode{
+  width:200px;
+  margin:auto;
+  }

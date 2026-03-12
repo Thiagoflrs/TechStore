@@ -2,7 +2,8 @@ export const paths = {
 
   public: {
     home: "/",
-    auth: "/auth"
+    auth: "/auth",
+    payments: "/payments"
   }
 
 };
