@@ -25,7 +25,3 @@
   transition: transform 0.3s ease;
   cursor: pointer;
 }
-
-.section-divider img:hover{
-  transform: scale(1.03);
-}

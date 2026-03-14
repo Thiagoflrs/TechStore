@@ -2,9 +2,64 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  --font-main: 'Inter', sans-serif;
+  --font-title: 'Montserrat', sans-serif;
+}
+body {
+  font-family: var(--font-main);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased; 
 }
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: #f5f5f5;
+h1, h2, h3 {
+  font-family: var(--font-title);
+  letter-spacing: -0.02em;
+}
+
+/* ---------------- PAGINAÇÃO (bolinhas) ---------------- */
+.swiper-pagination-bullet {
+  width: 10px !important;
+  height: 10px !important;
+  background: var(--background) !important;
+  opacity: 1 !important;
+  transition: all .3s ease;
+}
+
+.swiper-pagination-bullet-active {
+  width: 12px !important;
+  height: 12px !important;
+  background: var(--cta) !important;
+}
+
+/* ---------------- SETAS ---------------- */
+.swiper-button-next,
+.swiper-button-prev {
+  width: 28px !important;
+  height: 28px !important;
+  padding: 8px !important;
+  background: var(--background);
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: all .2s ease;
+}
+
+/* posição */
+.swiper-button-next{
+  right: 30px !important;
+}
+
+.swiper-button-prev{
+  left: 30px !important;
+}
+
+/* hover */
+.swiper-button-next:hover,
+.swiper-button-prev:hover{
+  background: var(--cta) !important;
+  color: white !important;
+}
+
+.swiper-button-next:hover::after,
+.swiper-button-prev:hover::after{
+  color: white !important;
 }

@@ -3,13 +3,24 @@ import { Star, ShoppingCart } from "lucide-react"
 
 function ProductCard({ product }) {
 
+  const calculateDiscount = (oldPrice, price) => {
+    if (!oldPrice) return null
+    return Math.round(((oldPrice - price) / oldPrice) * 100)
+  }
+
+  const discount = calculateDiscount(product.oldPrice, product.price)
+
+  const formatPrice = (value) => {
+    return value.toFixed(2).replace(".", ",")
+  }
+
   return (
 
     <div className="product-card">
 
-      {product.discount && (
+      {discount && (
         <span className="discount-badge">
-          -{product.discount}%
+          -{discount}%
         </span>
       )}
 
@@ -21,27 +32,16 @@ function ProductCard({ product }) {
         {product.name}
       </h4>
 
-      <div className="rating">
-
-        <Star size={16} fill="gold" stroke="gold"/>
-        <span>{product.rating}</span>
-
-        <span className="reviews">
-          ({product.reviews})
-        </span>
-
-      </div>
-
       <div className="price-box">
 
         {product.oldPrice && (
           <span className="old-price">
-            R$ {product.oldPrice}
+            R$ {formatPrice(product.oldPrice)}
           </span>
         )}
 
         <span className="price">
-          R$ {product.price}
+          R$ {formatPrice(product.price)}
         </span>
 
       </div>

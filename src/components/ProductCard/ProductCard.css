@@ -19,11 +19,14 @@
 .product-card{
   background:white;
   border-radius:10px;
+  cursor: pointer;
   width:250px;
+  min-height: 300px;
   display:flex;
   flex-direction:column;
   align-items:center;
-  padding:5px;
+  padding:15px;
+  justify-content: space-between;
   position: relative;
   text-align:center;
   transition:0.25s;
@@ -31,7 +34,6 @@
 }
 
 .product-card:hover{
-  transform:translateY(-6px);
   box-shadow:0 8px 25px rgba(0,0,0,0.15);
 }
 
@@ -47,45 +49,29 @@
   max-width:100%;
   max-height:100%;
   object-fit:contain;
-  transition:0.3s;
-}
-
-.product-card:hover img{
-  transform:scale(1.05);
 }
 
 .discount-badge{
   position:absolute;
   top:10px;
   left:10px;
-
   background:red;
   color:white;
-
   font-size:12px;
   font-weight:bold;
-
   padding:4px 8px;
   border-radius:4px;
 }
 
 .product-name{
-  font-size:15px;
+  font-size:14px;
   margin:10px 0;
   text-align:center;
-}
-
-.rating{
-  display:flex;
-  align-items:center;
-  gap:4px;
-
-  font-size:14px;
-}
-
-.reviews{
-  color:gray;
-  font-size:13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1;
 }
 
 .price-box{
@@ -102,7 +88,7 @@
 }
 
 .price{
-  font-size:20px;
+  font-size:16px;
   font-weight:bold;
   color:var(--secondary);
 }
