@@ -1,99 +1,261 @@
-.container{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  }
-  
-  .card{
-  background:white;
-  border-radius:12px;
-  box-shadow:0 8px 25px rgba(0,0,0,0.15);
-  }
-  
-  .layout{
-  display:flex;
-  width:850px;
-  min-height:450px;
-  }
-  
-  .lado-esquerdo{
-  width:250px;
-  background:#1a3c8b;
-  color:white;
-  padding:30px;
-  display:flex;
-  flex-direction:column;
-  gap:15px;
-  border-radius:12px 0 0 12px;
-  }
-  
-  .lado-esquerdo h2{
-  margin-bottom:20px;
-  }
-  
-  .lado-direito{
-  flex:1;
-  padding:40px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  }
-  
-  .botao{
-  padding:14px;
-  border:none;
-  border-radius:8px;
-  background:white;
-  color:#1a3c8b;
-  font-weight:bold;
-  cursor:pointer;
-  
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  }
-  
-  .botao:hover{
-  background:#dfe6ff;
-  }
-  
-  .icone{
-  font-size:18px;
-  }
-  
-  .info{
-  width:300px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  text-align:center;
-  }
-  
-  input,select{
-  padding:12px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  font-size:14px;
-  }
-  
-  .confirmar{
-  margin-top:10px;
-  padding:14px;
-  border:none;
-  border-radius:8px;
-  background:#1a3c8b;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-  }
-  
-  .confirmar:hover{
-  background:#0f2b66;
-  }
-  
-  .qrcode{
-  width:200px;
-  margin:auto;
-  }
+:root {
+  --primary: #0f172a;
+  --secondary: #3b82f6;
+  --cta: #2563eb;
+  --background: #f8fafc;
+  --text: #1f2937;
+  --white: #ffffff;
+  --success: #22c55e;
+  --error: #ef4444;
+}
+
+/* CONTAINER */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: "Inter", sans-serif;
+  position: relative;
+  background: var(--background);
+  overflow: hidden;
+}
+
+/* CARD LAYOUT */
+.card.layout {
+  display: flex;
+  width: 1200px;
+  min-height: 550px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--white);
+  border: 1px solid rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+/* MENU LATERAL */
+.lado-esquerdo {
+  width: 320px;
+  background: linear-gradient(180deg, #1e293b, #0f172a);
+  color: var(--white);
+  padding: 40px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border-right: 1px solid rgba(0,0,0,0.05);
+}
+
+/* BOTÕES DO MENU */
+.botao {
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--white);
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+}
+
+.botao:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.botao.ativo {
+  background: var(--white);
+  color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+/* CONTEÚDO DIREITO */
+.lado-direito {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.info {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 15px;
+  padding: 15px;
+}
+
+/* CARTÃO VISUAL & FLIP */
+.cartao-visual {
+  width: 340px;
+  height: 210px;
+  perspective: 1200px;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.cartao-frente,
+.cartao-verso {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  position: absolute;
+  backface-visibility: hidden;
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* GRADIENTES POR BANDEIRA - FRENTE */
+.Visa .cartao-frente { background: linear-gradient(135deg, #1a1f71, #005fb8); }
+.MasterCard .cartao-frente { background: linear-gradient(135deg, #eb001b, #ff5f00); }
+.AmericanExpress .cartao-frente { background: linear-gradient(135deg, #2e77bb, #00a6d6); }
+.Elo .cartao-frente { background: linear-gradient(135deg, #ffcc00, #ff3300, #0055ff); }
+
+/* VERSO DO CARTÃO COM BRILHO E COR RELACIONADA */
+.Visa .cartao-verso { background: linear-gradient(135deg, #3b4ab5, #a3b0f0); }
+.MasterCard .cartao-verso { background: linear-gradient(135deg, #ff5757, #ffc0a0); }
+.AmericanExpress .cartao-verso { background: linear-gradient(135deg, #4b9bdc, #a6d9f0); }
+.Elo .cartao-verso { background: linear-gradient(135deg, #ffd633, #ff6666, #6699ff); }
+
+/* VERSO DO CARTÃO COM BRILHO */
+.cartao-verso {
+  transform: rotateY(-180deg);
+  border-radius: 16px;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
+  padding: 20px 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  color: var(--primary);
+}
+
+/* FLIP DINÂMICO */
+.cartao-visual.virado .cartao-frente { transform: rotateY(180deg); }
+.cartao-visual.virado .cartao-verso { transform: rotateY(0deg); }
+
+/* ELEMENTOS INTERNOS */
+.chip {
+  width: 50px;
+  height: 35px;
+  background: linear-gradient(135deg, #fbbf24, #d97706);
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.numero-cartao {
+  font-size: 1.3rem;
+  letter-spacing: 2.5px;
+  font-family: "Courier New", monospace;
+  color: var(--white);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  transition: color 0.3s ease;
+}
+
+.nome-cartao,
+.validade-cartao {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--white);
+  transition: color 0.3s ease;
+}
+
+.logo-bandeira {
+  font-size: 2rem;
+}
+
+.faixa-preta {
+  width: 100%;
+  height: 45px;
+  background: #000;
+  margin-top: 15px;
+  border-radius: 4px;
+}
+
+.cvv-display {
+  background: var(--white);
+  color: var(--primary);
+  height: 38px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  font-weight: bold;
+  font-style: italic;
+  font-family: "Courier New", monospace;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+/* INPUTS COM FUNDO BRANCO E SOMBRA */
+input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(0,0,0,0.1);
+  background: var(--white);
+  color: var(--primary);
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  border-color: var(--cta);
+  box-shadow: 0 4px 15px rgba(37,99,235,0.3);
+  outline: none;
+}
+
+/* BOTÃO FINALIZAR PAGAMENTO */
+.confirmar {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--cta);
+  color: var(--white);
+  transition: all 0.3s ease;
+}
+
+.confirmar:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37,99,235,0.4);
+}
+
+.confirmar:disabled {
+  background: #cbd5e1;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* VALIDAÇÕES COM ANIMAÇÃO */
+.valid { border-bottom: 2px solid var(--success) !important; }
+.invalid { border-bottom: 2px solid var(--error) !important; animation: shake 0.3s ease-in-out; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 950px) {
+  .card.layout { width: 95%; flex-direction: column; }
+  .lado-esquerdo { width: 100%; flex-direction: row; padding: 20px; }
+}

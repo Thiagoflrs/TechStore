@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { useForm } from "../../../hooks/useForm";
 import { validateRegister } from "../../../validators/authValidator";
 import { useAge } from "../../../hooks/useAge";
-import DatePicker from "react-datepicker";
 
 function RegisterForm() {
   const { form, errors, handleChange, handleSubmit } = useForm(

@@ -1,204 +1,209 @@
 import { useState, useEffect } from "react";
 import "./Payments.css";
+import {
+  validateCreditCard,
+  validateExpiryDate,
+} from "../../utils/cardValidator";
+import { FaQrcode, FaCreditCard } from "react-icons/fa";
+import VisualCard from "./VisualCard";
+import Header from "../../components/header/Header";
+import Footer from "../../components/footer/Footer";
+import RecommendedBrands from "../../components/BrandCard/RecommendedBrands";
 
-import { FaQrcode } from "react-icons/fa";
-import { FaCreditCard } from "react-icons/fa";
-import { FaMoneyCheckAlt } from "react-icons/fa";
 
 function Pagamento() {
-  const [metodo, setMetodo] = useState("");
+  const [metodo, setMetodo] = useState("credito");
   const [analise, setAnalise] = useState(false);
   const [tempo, setTempo] = useState(300);
+  const [virado, setVirado] = useState(false);
 
-  const [numeroCartao, setNumeroCartao] = useState("");
-  const [numeroLimpo, setNumeroLimpo] = useState("");
-  const [validade, setValidade] = useState("");
+  const [dados, setDados] = useState({
+    numero: "",
+    nome: "",
+    validade: "",
+    cvv: "",
+    bandeira: null,
+  });
 
-  function confirmarPagamento() {
-    setAnalise(true);
-  }
+  const [validacao, setValidacao] = useState({ cartao: null, data: null });
 
+  // Timer do PIX (Contagem regressiva)
   useEffect(() => {
+    let timer;
     if (metodo === "pix" && tempo > 0) {
-      const timer = setInterval(() => {
-        setTempo((t) => t - 1);
-      }, 1000);
-
-      return () => clearInterval(timer);
+      timer = setInterval(() => setTempo((t) => t - 1), 1000);
     }
+    return () => clearInterval(timer);
   }, [metodo, tempo]);
 
-  function formatarTempo(segundos) {
-    const min = Math.floor(segundos / 60);
-    const seg = segundos % 60;
+  const handleChange = (e) => {
+    let { name, value } = e.target;
 
-    return `${min}:${seg < 10 ? "0" + seg : seg}`;
-  }
+    if (name === "numero") {
+      value = value.replace(/\D/g, "").slice(0, 16);
+      const res = validateCreditCard(value);
+      setValidacao((prev) => ({ ...prev, cartao: res }));
+      setDados((prev) => ({ ...prev, numero: value, bandeira: res?.bandeira }));
+    } else if (name === "validade") {
+      value = value
+        .replace(/\D/g, "")
+        .replace(/(\d{2})(\d)/, "$1/$2")
+        .slice(0, 5);
 
-  function formatarCartao(valor) {
-    let numeros = valor.replace(/\D/g, "");
+      setDados((prev) => ({ ...prev, [name]: value }));
 
-    if (numeros.length > 16) {
-      numeros = numeros.slice(0, 16);
+      if (value.length === 5) {
+        setValidacao((prev) => ({
+          ...prev,
+          data: validateExpiryDate(value),
+        }));
+      }
+    } else if (name === "nome") {
+      setDados((prev) => ({ ...prev, [name]: value.toUpperCase() }));
+    } else {
+      setDados((prev) => ({ ...prev, [name]: value }));
     }
+  };
 
-    setNumeroLimpo(numeros);
-
-    let formatado = numeros.replace(/(\d{4})(?=\d)/g, "$1 ");
-
-    setNumeroCartao(formatado);
-  }
-
-  function formatarValidade(valor) {
-    let numeros = valor.replace(/\D/g, "");
-
-    if (numeros.length > 4) {
-      numeros = numeros.slice(0, 4);
-    }
-
-    if (numeros.length > 2) {
-      numeros = numeros.replace(/(\d{2})(\d+)/, "$1/$2");
-    }
-
-    setValidade(numeros);
-  }
-
+  // Tela de Processamento
   if (analise) {
     return (
       <div className="container">
-        <div className="card">
-          <h1>Pagamento em análise</h1>
-
-          <p>Seu pagamento foi enviado e está sendo analisado.</p>
+        <div className="card shadow-lg p-5 text-center">
+          <h1 className="text-primary">Pagamento em análise</h1>
+          <p>Aguarde enquanto processamos seus dados...</p>
+          <div className="spinner"></div> {/* Sugestão de feedback visual */}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container">
-      <div className="card layout">
-        <div className="lado-esquerdo">
-          <h2>Forma de pagamento</h2>
+    <>
+      <Header />
 
-          <button className="botao" onClick={() => setMetodo("pix")}>
-            <FaQrcode className="icone" />
-            PIX
-          </button>
+      <div className="container">
+        <div className="card layout">
+          {/* SEÇÃO DE SELEÇÃO (ESQUERDA) */}
+          <div className="lado-esquerdo">
+            <h2>Pagamento</h2>
 
-          <button className="botao" onClick={() => setMetodo("debito")}>
-            <FaMoneyCheckAlt className="icone" />
-            Débito
-          </button>
+            <button
+              className={`botao ${metodo === "pix" ? "ativo" : ""}`}
+              onClick={() => setMetodo("pix")}
+            >
+              <FaQrcode /> PIX
+            </button>
 
-          <button className="botao" onClick={() => setMetodo("credito")}>
-            <FaCreditCard className="icone" />
-            Crédito
-          </button>
-        </div>
+            <button
+              className={`botao ${metodo === "credito" ? "ativo" : ""}`}
+              onClick={() => setMetodo("credito")}
+            >
+              <FaCreditCard /> Cartão
+            </button>
+          </div>
 
-        <div className="lado-direito">
-          {metodo === "" && <p>Escolha uma forma de pagamento</p>}
+          {/* SEÇÃO DE CONTEÚDO (DIREITA) */}
+          <div className="lado-direito">
+            {metodo === "pix" ? (
+              <div className="info">
+                <img
+                  className="qrcode"
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=PixTechStore"
+                  alt="QR Code Pix"
+                />
 
-          {metodo === "pix" && (
-            <div className="info">
-              <h3>Pagamento via Pix</h3>
+                <p>
+                  Expira em:{" "}
+                  <strong>
+                    {Math.floor(tempo / 60)}:
+                    {String(tempo % 60).padStart(2, "0")}
+                  </strong>
+                </p>
 
-              <img
-                className="qrcode"
-                src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PagamentoPix"
-                alt="pix"
-              />
-
-              <p>Tempo restante: {formatarTempo(tempo)}</p>
-
-              {tempo === 0 ? (
-                <p style={{ color: "red" }}>QR Code expirado</p>
-              ) : (
-                <button className="confirmar" onClick={confirmarPagamento}>
-                  Confirmar pagamento
+                <button className="confirmar" onClick={() => setAnalise(true)}>
+                  Confirmar PIX
                 </button>
-              )}
-            </div>
-          )}
+              </div>
+            ) : (
+              <div className="info">
+                {/* COMPONENTE VISUAL DO CARTÃO */}
+                <VisualCard
+                  numero={dados.numero}
+                  nome={dados.nome}
+                  validade={dados.validade}
+                  cvv={dados.cvv}
+                  bandeira={dados.bandeira}
+                  virado={virado}
+                  validacao={validacao}
+                />
 
-          {metodo === "debito" && (
-            <div className="info">
-              <h3>Cartão de Débito</h3>
+                {/* FORMULÁRIO DE ENTRADA */}
+                <div className="formulario-cartao">
+                  <input
+                    name="numero"
+                    type="text"
+                    placeholder="Número do Cartão"
+                    value={dados.numero}
+                    onChange={handleChange}
+                  />
 
-              <input
-                placeholder="Número do cartão"
-                value={numeroCartao}
-                onChange={(e) => formatarCartao(e.target.value)}
-              />
+                  <input
+                    name="nome"
+                    type="text"
+                    placeholder="Nome no Cartão"
+                    value={dados.nome}
+                    onChange={handleChange}
+                  />
 
-              <input placeholder="Nome no cartão" />
+                  <div
+                    className="input-group"
+                    style={{ display: "flex", gap: "10px" }}
+                  >
+                    <input
+                      name="validade"
+                      type="text"
+                      placeholder="MM/AA"
+                      value={dados.validade}
+                      onChange={handleChange}
+                      maxLength={5}
+                    />
 
-              <input
-                placeholder="Validade (MM/AA)"
-                value={validade}
-                onChange={(e) => formatarValidade(e.target.value)}
-              />
+                    <input
+                      name="cvv"
+                      type="text"
+                      placeholder="CVV"
+                      maxLength={4}
+                      value={dados.cvv}
+                      onFocus={() => setVirado(true)}
+                      onBlur={() => setVirado(false)}
+                      onChange={(e) =>
+                        setDados({
+                          ...dados,
+                          cvv: e.target.value.replace(/\D/g, ""),
+                        })
+                      }
+                    />
+                  </div>
 
-              <input
-                placeholder="CVV"
-                maxLength="3"
-                onChange={(e) =>
-                  (e.target.value = e.target.value.replace(/\D/g, ""))
-                }
-              />
-
-              <button className="confirmar" onClick={confirmarPagamento}>
-                Confirmar pagamento
-              </button>
-            </div>
-          )}
-
-          {metodo === "credito" && (
-            <div className="info">
-              <h3>Cartão de Crédito</h3>
-
-              <input
-                placeholder="Número do cartão"
-                value={numeroCartao}
-                onChange={(e) => formatarCartao(e.target.value)}
-              />
-
-              <input placeholder="Nome no cartão" />
-
-              <input
-                placeholder="Validade (MM/AA)"
-                value={validade}
-                onChange={(e) => formatarValidade(e.target.value)}
-              />
-
-              <input
-                placeholder="CVV"
-                maxLength="3"
-                onChange={(e) =>
-                  (e.target.value = e.target.value.replace(/\D/g, ""))
-                }
-              />
-
-              {numeroLimpo.length === 16 && (
-                <select>
-                  <option>1x sem juros</option>
-                  <option>2x sem juros</option>
-                  <option>3x sem juros</option>
-                  <option>4x sem juros</option>
-                  <option>5x sem juros</option>
-                  <option>6x sem juros</option>
-                </select>
-              )}
-
-              <button className="confirmar" onClick={confirmarPagamento}>
-                Confirmar pagamento
-              </button>
-            </div>
-          )}
+                  <button
+                    className="confirmar"
+                    onClick={() => setAnalise(true)}
+                    disabled={
+                      !validacao.cartao?.valid || !validacao.data?.valid
+                    }
+                  >
+                    Finalizar Pagamento
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+      <RecommendedBrands title="Marcas Recomendadas"/>
+      <Footer />
+    </>
   );
 }
 

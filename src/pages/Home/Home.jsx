@@ -1,5 +1,5 @@
-import Header from "../../components/Header/Header";
 import Banner from "../../components/Banner/Banner";
+import Header from "../../components/header/Header";
 import Categories from "../../components/Categories/Categories";
 import ProductSection from "../../components/ProductSection/ProductSection";
 import SectionDivider from "../../components/SectionDivider/SectionDivider";
