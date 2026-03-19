@@ -1,4 +1,5 @@
 import { validationMessages } from "../constants/message";
+import { calculateAge } from "../utils/calculateAge";
 
 export function validateLogin(form) {
   const errors = {};
@@ -31,6 +32,27 @@ export function validateRegister(form) {
     errors.email = validationMessages.email.required;
   } else if (!/\S+@\S+\.\S+/.test(form.email)) {
     errors.email = validationMessages.email.invalid;
+  }
+
+  if (!form.birthDate) {
+    errors.birthDate = validationMessages.birthDate.required;
+  } else {
+    const birth = new Date(form.birthDate);
+    const today = new Date();
+
+    if (birth >= today) {
+      errors.birthDate = validationMessages.birthDate.invalid;
+    }
+
+    const age = calculateAge(form.birthDate);
+
+    if (age < 18) {
+      errors.birthDate = validationMessages.birthDate.underage;
+    }
+  }
+  
+  if (!form.gender) {
+    errors.gender = validationMessages.gender.required;
   }
 
   if (!form.password) {

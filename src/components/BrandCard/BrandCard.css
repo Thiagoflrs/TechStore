@@ -3,8 +3,8 @@
   border-radius: 12px;
   padding: 15px;
   text-align: center;
-  cursor: pointer;
   display: flex;
+  cursor:text;
   flex-direction: column;
   align-items: center;
   justify-content: center;

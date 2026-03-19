@@ -151,6 +151,91 @@
   transform: translateY(-1px);
 }
 
+.auth-form select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  background: white;
+  color: var(--text);
+  transition: all 0.25s;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%236b7280' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M5 7l5 5 5-5H5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+.auth-form select:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.auth-form select.input-error {
+  border-color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.auth-form select.input-error:focus {
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+}
+
+.auth-form input:hover,
+.auth-form select:hover {
+  border-color: var(--secondary);
+}
+
+
+.auth-form input[type="date"] {
+  color: var(--text);
+  cursor: pointer;
+}
+
+.auth-form input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: 0.2s;
+}
+
+.auth-form input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+
+/*BOTÃO DESABILITADO */
+.auth-form button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+}
+
+.auth-form button:disabled:hover {
+  background: #ccc;
+  transform: none;
+}
+
+/* IDADE VÁLIDA/INVÁLIDA */
+.age-valid,
+.age-invalid {
+  margin-top: 4px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.age-valid {
+  color: #16a34a;
+}
+
+.age-invalid {
+  color: #dc2626;
+}
+
 /* SOCIAL LOGIN */
 .social-login {
   margin-top: 25px;
