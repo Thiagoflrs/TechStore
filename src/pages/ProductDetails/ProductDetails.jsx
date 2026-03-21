@@ -92,8 +92,8 @@ export default function ProductDetails() {
             <p className="description">{product.description}</p>
 
             {/* PREÇO */}
-            <div className="price-box">
-              <h2 className="price">
+            <div className="price-boxDetails">
+              <h2 className="price-details">
                 {formatPrice(product.price)}
               </h2>
 

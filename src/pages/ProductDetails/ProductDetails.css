@@ -81,14 +81,14 @@
   line-height: 1.4;
 }
 
-.price-box {
+.price-boxDetails {
   background: #f1f5f9;
   padding: 20px;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
 }
 
-.price {
+.price-details {
   color: var(--cta);
   font-size: 2.2rem;
   font-weight: 800;
