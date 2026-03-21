@@ -2,15 +2,33 @@ import { Search, ShoppingCart, User, Heart, Headset, LogOut } from "lucide-react
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import "./Header.css";
+import Swal from "sweetalert2";
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await logout();
+const handleLogout = async () => {
+  try {
+    const mensagem = await logout();
+    await Swal.fire({
+      icon: 'success',
+      title: 'Sucesso!',
+      text: mensagem,        
+      timer: 1500,
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
     navigate("/");
-  };
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Ops...',
+      text: 'Erro ao sair. Tente novamente.',
+    });
+  }
+};
 
   return (
     <header className="header">
@@ -23,7 +41,7 @@ function Header() {
         </div>
 
         <div className="actions">
-          {user?.nome ? (
+          {user ? (
             <div className="login-logged">
               <User size={25} className="login-icon" />
               <div className="login-text">

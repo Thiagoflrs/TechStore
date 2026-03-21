@@ -2,11 +2,15 @@ import { useState } from "react";
 import { login as loginService, logoutService } from "../services/authService";
 
 export function useAuth() {
-  const [user, setUser] = useState({
-    nome: localStorage.getItem("nome") || "",
+  const [user, setUser] = useState(() => {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+  return {
+    nome: localStorage.getItem("nome"),
     saldo: parseFloat(localStorage.getItem("saldo")) || 0,
-    token: localStorage.getItem("token") || "",
-  });
+    token,
+  };
+});
 
   const login = async (email, senha) => {
     const { token, nome, saldo } = await loginService(email, senha);
@@ -17,8 +21,9 @@ export function useAuth() {
   };
 
   const logout = async () => {
-    await logoutService();
-    setUser({ token: "", nome: "", saldo: 0 });
+    const mensagem = await logoutService();
+    setUser(null);
+    return mensagem;
   };
 
   return { user, login, logout };

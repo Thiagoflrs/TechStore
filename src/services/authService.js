@@ -25,14 +25,20 @@ export const logoutService = async () => {
   const token = localStorage.getItem("token");
   if (!token) return;
 
-  await fetch(`${API_URL}/logout`, {
+  const response = await fetch(`${API_URL}/logout`, {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${token}`,
     },
   });
 
+  const data = await response.json();
+
   localStorage.removeItem("token");
+  localStorage.removeItem("nome");
+  localStorage.removeItem("saldo");
+
+  return data.Mensagem; 
 };
 
 export const register = async (data) => {
