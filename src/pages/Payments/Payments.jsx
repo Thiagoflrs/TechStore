@@ -27,7 +27,6 @@ function Pagamento() {
 
   const [validacao, setValidacao] = useState({ cartao: null, data: null });
 
-  // Timer do PIX (Contagem regressiva)
   useEffect(() => {
     let timer;
     if (metodo === "pix" && tempo > 0) {
@@ -65,7 +64,6 @@ function Pagamento() {
     }
   };
 
-  // Tela de Processamento
   if (analise) {
     return (
       <div className="container">

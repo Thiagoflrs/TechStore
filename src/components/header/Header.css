@@ -1,16 +1,16 @@
 .header{
-  background:var(--primary);
-  padding:15px 0;
-  color:white;
+  background: var(--primary);
+  padding: 15px 0;
+  color: white;
 }
 
 .header-container{
-  width:90%;
-  max-width:1400px;
-  margin:auto;
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
+  width: 90%;
+  max-width: 1400px;
+  margin: auto;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
 }
 
 .logo {
@@ -50,7 +50,7 @@
 .actions{
   display:flex;
   align-items: center;
-  gap:25px;
+  gap: 25px;
 }
 
 .action-item {
@@ -65,23 +65,23 @@
   opacity: 0.8;
 }
 
-.login{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  text-decoration:none;
-  color:white;
+.login, .login-logged{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: white;
 }
 
 .login-text{
-  display:flex;
-  flex-direction:column;
-  font-size:12px;
-  line-height:1.2;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .login-text strong{
-  font-size:13px;
+  font-size: 13px;
 }
 
 .login-icon{
@@ -94,13 +94,31 @@
   justify-content: center;
 }
 
+.logout-button{
+  background: var(--secondary);
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: opacity 0.2s;
+}
+
+.logout-button:hover{
+  opacity: 0.8;
+}
+
 .cart{
-  position:relative;
-  background:var(--cta);
-  border:none;
-  padding:10px;
-  border-radius:50%;
-  cursor:pointer;
+  position: relative;
+  background: var(--cta);
+  border: none;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
   color: white;
   display: flex;
   align-items: center;
@@ -108,15 +126,28 @@
 }
 
 .cart-count{
-  position:absolute;
-  top:-5px;
-  right:-5px;
-  color:white;
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:12px;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  color: white;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.login-logged .login-text{
+  text-align: right;
+}
+
+.login-logged span{
+  font-size: 13px;
+}
+
+.login-logged strong{
+  font-size: 13px;
+  color: var(--secondary);
 }

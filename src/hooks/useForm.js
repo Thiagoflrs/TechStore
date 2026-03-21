@@ -9,7 +9,6 @@ export function useForm(initialValues, validate) {
 
     setForm((prev) => ({ ...prev, [name]: value }));
     
-    // Limpa o erro do campo assim que o usuário começa a digitar
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -24,7 +23,6 @@ export function useForm(initialValues, validate) {
     
     const validationErrors = validate(form);
 
-    // LOG DE SEGURANÇA: Deve imprimir um OBJETO ou NULL
     console.log("Resultado da validação:", validationErrors);
 
     if (validationErrors && Object.keys(validationErrors).length > 0) {

@@ -33,7 +33,6 @@ export default function ProductDetails() {
 
   const pixPrice = product.price * 0.9;
 
-  // 🎯 ZOOM COM CONTROLE
   const handleMouseMove = (e) => {
     if (!showZoom) return;
 

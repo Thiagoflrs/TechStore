@@ -16,18 +16,16 @@ const VisualCard = ({
   validacao 
 }) => {
   
-  // Mapeamento de logotipos atualizado para incluir Elo
   const getLogo = (b) => {
     switch (b) {
       case "Visa": return <FaCcVisa />;
       case "MasterCard": return <FaCcMastercard />;
       case "AmericanExpress": return <FaCcAmex />;
-      case "Elo": return <FaCreditCard />; // Elo usa ícone de cartão genérico ou SVG customizado
+      case "Elo": return <FaCreditCard />;
       default: return <FaCreditCard />;
     }
   };
 
-  // Lógica de formatação robusta: remove espaços e agrupa de 4 em 4
   const formatarNumero = (num) => {
     if (!num) return "**** **** **** ****";
     const cleanNum = num.replace(/\s?/g, "");
@@ -43,7 +41,6 @@ const VisualCard = ({
     : "";
 
   return (
-    /* A classe dinâmica `${bandeira}` permite estilizar as cores via CSS */
     <div className={`cartao-visual ${virado ? "virado" : ""} ${bandeira || ""}`}>
       
       {/* FRENTE DO CARTÃO */}

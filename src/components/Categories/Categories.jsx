@@ -30,7 +30,6 @@ const categories = [
   { name: "Câmeras", icon: Camera },
 ];
 
-/* duplicação para garantir loop infinito */
 const infiniteCategories = [...categories, ...categories];
 
 function Categories({ title }) {

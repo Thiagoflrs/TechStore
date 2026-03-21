@@ -10,10 +10,10 @@ export function validateLogin(form) {
     errors.email = validationMessages.email.invalid;
   }
 
-  if (!form.password) {
-    errors.password = validationMessages.password.required;
-  } else if (form.password.length < 6) {
-    errors.password = validationMessages.password.short;
+  if (!form.senha) {
+    errors.senha = validationMessages.password.required;
+  } else if (form.senha.length < 6) {
+    errors.senha = validationMessages.password.short;
   }
 
   return Object.keys(errors).length > 0 ? errors : null;

@@ -2,6 +2,10 @@ import { motion } from "framer-motion";
 import { useForm } from "../../../hooks/useForm";
 import { validateRegister } from "../../../validators/authValidator";
 import { useAge } from "../../../hooks/useAge";
+import { register as registerService } from "../../../services/authService";
+import { useAuth } from "../../../hooks/useAuth";
+import Swal from "sweetalert2";
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 function RegisterForm() {
   const { form, errors, handleChange, handleSubmit } = useForm(
@@ -13,23 +17,43 @@ function RegisterForm() {
       birthDate: "",
       gender: "",
     },
-    validateRegister,
+    validateRegister
   );
 
+  const { login } = useAuth();
   const age = useAge(form.birthDate);
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     if (errors && Object.keys(errors).length > 0) return;
-    console.log("Cadastro válido:", data);
+
+    try {
+      await registerService(data);
+      await login(data.email, data.password);
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Conta criada!',
+        text: `Bem-vindo(a), ${data.name}! Agora você está logado.`,
+        confirmButtonText: 'Tela principal',
+        timer: 2500,
+        timerProgressBar: true,
+      });
+
+      window.location.href = "/";
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Ops...',
+        text: error.message || 'Erro ao criar a conta',
+        confirmButtonText: 'Ok',
+      });
+    }
   };
 
   const shakeVariant = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
-    error: {
-      x: [0, -10, 10, -10, 10, 0],
-      transition: { duration: 0.4 },
-    },
+    error: { x: [0, -10, 10, -10, 10, 0], transition: { duration: 0.4 } },
   };
 
   return (
@@ -40,11 +64,8 @@ function RegisterForm() {
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
     >
-      {/* Campo Nome */}
-      <motion.div
-        variants={shakeVariant}
-        animate={errors.name ? "error" : "visible"}
-      >
+      {/* Nome */}
+      <motion.div variants={shakeVariant} animate={errors.name ? "error" : "visible"}>
         <input
           type="text"
           name="name"
@@ -56,11 +77,8 @@ function RegisterForm() {
         {errors.name && <p className="error">{errors.name}</p>}
       </motion.div>
 
-      {/* Campo Email */}
-      <motion.div
-        variants={shakeVariant}
-        animate={errors.email ? "error" : "visible"}
-      >
+      {/* Email */}
+      <motion.div variants={shakeVariant} animate={errors.email ? "error" : "visible"}>
         <input
           type="email"
           name="email"
@@ -72,27 +90,20 @@ function RegisterForm() {
         {errors.email && <p className="error">{errors.email}</p>}
       </motion.div>
 
-      {/* Campo Data de Nascimento */}
-      <motion.div
-        variants={shakeVariant}
-        animate={errors.birthDate ? "error" : "visible"}
-      >
+      {/* Data de Nascimento */}
+      <motion.div variants={shakeVariant} animate={errors.birthDate ? "error" : "visible"}>
         <input
           type="date"
           name="birthDate"
           className={errors.birthDate ? "input-error" : ""}
-          placeholder="Data de nascimento"
           value={form.birthDate}
           onChange={handleChange}
-          max={
-            new Date(new Date().setFullYear(new Date().getFullYear() - 18))
-              .toISOString()
-              .split("T")[0]
-          }
+          max={new Date(new Date().setFullYear(new Date().getFullYear() - 18))
+            .toISOString()
+            .split("T")[0]}
         />
         {errors.birthDate && <p className="error">{errors.birthDate}</p>}
 
-        {/* Idade dinâmica */}
         {age !== null && !errors.birthDate && (
           <p className={age >= 18 ? "age-valid" : "age-invalid"}>
             {age >= 18
@@ -102,11 +113,8 @@ function RegisterForm() {
         )}
       </motion.div>
 
-      {/* Campo Gênero */}
-      <motion.div
-        variants={shakeVariant}
-        animate={errors.gender ? "error" : "visible"}
-      >
+      {/* Gênero */}
+      <motion.div variants={shakeVariant} animate={errors.gender ? "error" : "visible"}>
         <select
           name="gender"
           className={errors.gender ? "input-error" : ""}
@@ -123,11 +131,8 @@ function RegisterForm() {
         {errors.gender && <p className="error">{errors.gender}</p>}
       </motion.div>
 
-      {/* Campo Senha */}
-      <motion.div
-        variants={shakeVariant}
-        animate={errors.password ? "error" : "visible"}
-      >
+      {/* Senha */}
+      <motion.div variants={shakeVariant} animate={errors.password ? "error" : "visible"}>
         <input
           type="password"
           name="password"
@@ -139,11 +144,8 @@ function RegisterForm() {
         {errors.password && <p className="error">{errors.password}</p>}
       </motion.div>
 
-      {/* Campo Confirmar Senha */}
-      <motion.div
-        variants={shakeVariant}
-        animate={errors.confirmPassword ? "error" : "visible"}
-      >
+      {/* Confirmar Senha */}
+      <motion.div variants={shakeVariant} animate={errors.confirmPassword ? "error" : "visible"}>
         <input
           type="password"
           name="confirmPassword"
@@ -152,17 +154,14 @@ function RegisterForm() {
           value={form.confirmPassword}
           onChange={handleChange}
         />
-        {errors.confirmPassword && (
-          <p className="error">{errors.confirmPassword}</p>
-        )}
+        {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
       </motion.div>
 
+      {/* Botão */}
       <motion.button
         type="submit"
         disabled={errors && Object.keys(errors).length > 0}
-        className={
-          errors && Object.keys(errors).length > 0 ? "btn-disabled" : ""
-        }
+        className={errors && Object.keys(errors).length > 0 ? "btn-disabled" : ""}
         variants={shakeVariant}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
