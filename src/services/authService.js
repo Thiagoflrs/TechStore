@@ -21,14 +21,17 @@ export const login = async (email, senha) => {
   }
 };
 
-export const logout = async () => {
+export const logoutService = async () => {
   const token = localStorage.getItem("token");
+  if (!token) return;
+
   await fetch(`${API_URL}/logout`, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${token}`
-    }
+      "Authorization": `Bearer ${token}`,
+    },
   });
+
   localStorage.removeItem("token");
 };
 
