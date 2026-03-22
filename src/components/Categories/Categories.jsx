@@ -9,7 +9,7 @@ import {
   Smartphone,
   Camera,
 } from "lucide-react";
-
+import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 
@@ -64,13 +64,18 @@ function Categories({ title }) {
 
           return (
             <SwiperSlide key={`${cat.name}-${index}`}>
-              <div className="category-item">
-                <div className="category-card">
-                  <Icon className="category-icon" />
-                </div>
+              <Link 
+                to={`/categoria/${cat.name.toLowerCase()}`} 
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                <div className="category-item">
+                  <div className="category-card">
+                    <Icon className="category-icon" />
+                  </div>
 
-                <span className="category-name">{cat.name}</span>
-              </div>
+                  <span className="category-name">{cat.name}</span>
+                </div>
+              </Link>
             </SwiperSlide>
           );
         })}

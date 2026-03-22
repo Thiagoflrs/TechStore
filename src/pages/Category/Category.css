@@ -1,0 +1,98 @@
+.cat-page {
+  background-color: #fff;
+  min-height: 100vh;
+}
+
+.cat-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.cat-header {
+  margin-bottom: 30px;
+}
+
+.cat-back {
+  text-decoration: none;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.cat-title {
+  font-size: 2rem;
+  text-transform: capitalize;
+  margin: 0;
+}
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 30px;
+}
+
+.cat-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.cat-img-box {
+  background-color: #f8f8f8;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.cat-img-box img {
+  width: 80%;
+  object-fit: contain;
+}
+
+.cat-txt-box h3 {
+  font-size: 1rem;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cat-price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 10px 0;
+}
+
+/* O BOTÃO AZUL COM EXPANSÃO */
+.cat-buy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff; /* Azul padrão */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease; /* Suaviza a expansão */
+}
+
+.cat-buy-btn:hover {
+  background-color: #0056b3; /* Azul mais escuro no hover */
+  transform: scale(1.05); /* Efeito de expansão */
+  box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+}
+
+.cat-empty {
+  text-align: center;
+  padding: 50px;
+  color: #999;
+}

@@ -1,4 +1,4 @@
-import { Search, ShoppingCart, User, Heart, Headset, LogOut } from "lucide-react";
+import { Search, ShoppingBasket, User, Heart, Headset, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import "./Header.css";
@@ -9,31 +9,33 @@ function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-const handleLogout = async () => {
-  try {
-    const mensagem = await logout();
-    await Swal.fire({
-      icon: 'success',
-      title: 'Sucesso!',
-      text: mensagem,        
-      timer: 1500,
-      timerProgressBar: true,
-      showConfirmButton: false,
-    });
-    navigate("/");
-  } catch (error) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Ops...',
-      text: 'Erro ao sair. Tente novamente.',
-    });
-  }
-};
+  const handleLogout = async () => {
+    try {
+      const mensagem = await logout();
+      await Swal.fire({
+        icon: 'success',
+        title: 'Sucesso!',
+        text: mensagem,        
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      navigate("/");
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Ops...',
+        text: 'Erro ao sair. Tente novamente.',
+      });
+    }
+  };
 
   return (
     <header className="header">
       <div className="header-container">
-        <h2 className="logo">Tech<span>Store</span></h2>
+        <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'contents' }}>
+          <h2 className="logo">Tech<span>Store</span></h2>
+        </Link>
 
         <div className="search">
           <Search size={16} className="search-icon" />
@@ -71,8 +73,7 @@ const handleLogout = async () => {
           </Link>
 
           <button className="cart" title="Carrinho">
-            <ShoppingCart size={20} />
-            <span className="cart-count">0</span>
+            <ShoppingBasket size={26} strokeWidth={2.5} color="#00ff88" />
           </button>
         </div>
       </div>

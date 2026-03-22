@@ -2,9 +2,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { paths } from "./paths";
 import Home from "../pages/Home/Home.jsx";
 import Auth from "../pages/Auth/Auth.jsx";
-import Payments from "../pages/Payments/Payments.jsx"
+import Payments from "../pages/Payments/Payments.jsx";
 import Product from "../pages/ProductDetails/ProductDetails.jsx";
-
+import Category from "../pages/Category/Category.jsx";
 
 function AppRoutes() {
   return (
@@ -14,6 +14,8 @@ function AppRoutes() {
         <Route path={paths.public.auth} element={<Auth />} />
         <Route path={paths.public.payments} element={<Payments />} />
         <Route path={paths.public.productDetails} element={<Product />} />
+        <Route path="/categoria/:nomeCategoria" element={<Category />} />
+        <Route path="*" element={<Home />} />
       </Routes>
     </BrowserRouter>
   );
