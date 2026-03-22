@@ -28,6 +28,7 @@ const mapProduto = (produto) => {
     image: getImageById(produto.ProdutoId),
     installment: "ou 3x sem juros",
     stock: produto.Quantidade,
+    categoriaId: produto.CategoriaId,
   };
 };
 

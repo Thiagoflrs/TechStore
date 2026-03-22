@@ -2,7 +2,7 @@ import ProductCard from "../ProductCard/ProductCard";
 import { getProdutos } from "../../services/productService";
 import { useEffect, useState } from "react";
 
-function ProductSection({ title }) {
+function ProductSection({ title, categoriasIds }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -10,15 +10,23 @@ function ProductSection({ title }) {
     const fetchProdutos = async () => {
       try {
         const data = await getProdutos();
-        setProducts(data);
+
+        const filtrados = categoriasIds
+          ? data.filter((p) =>
+              categoriasIds.includes(p.categoriaId)
+            )
+          : data;
+
+        setProducts(filtrados);
       } catch (error) {
         console.error(error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchProdutos();
-  }, []);
+  }, [categoriasIds]); // ✅ CORRETO
 
   return (
     <section style={{ padding: "40px" }}>
@@ -35,8 +43,8 @@ function ProductSection({ title }) {
             flexWrap: "wrap",
           }}
         >
-          {products.map((p, i) => (
-            <ProductCard key={i} product={p} />
+          {products.slice(0, 10).map((p) => (
+            <ProductCard key={p.id} product={p} />
           ))}
         </div>
       )}
