@@ -154,7 +154,6 @@ export default function ProductDetails() {
             <div className="benefits">
               <div>🚚 Frete rápido</div>
               <div>🔒 Compra segura</div>
-              <div>💳 Até 12x sem juros</div>
             </div>
           </div>
 

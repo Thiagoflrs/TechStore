@@ -18,13 +18,13 @@ function Home() {
       <Header />
       <Banner />
       <Categories title="Confira nossas Categorias" />
-      <ProductSection title="Gamer" categoriasIds = {[8, 5, 6]}/>
+      <ProductSection title="Consoles" categoriasIds = {[ 8 ]}/> {/**consoles */}
       <SectionDivider images={[Banner0]} />
-      <ProductSection title="Acessórios" categoriasIds = {[3, 9]}/>
+      <ProductSection title="Acessórios" categoriasIds = {[2, 9]}/> {/** acessorios, cabos */}
       <SectionDivider images={[Banner1, Banner2]} />
-      <ProductSection title="Periféricos" categoriasIds = {[5, 6]}/>
+      <ProductSection title="Periféricos" categoriasIds = {[5, 6, 7, 4]}/> {/** mouse, teclados, monitores, fone */}
       <SectionDivider images={[Banner3, Banner4, Banner5]} />
-      <ProductSection title="Periféricos" categoriasIds = {[1, 11]}/>
+      <ProductSection title="Smartphones" categoriasIds = {[ 1 ]}/> {/** celular */}
       <RecommendedBrands title="Marcas Recomendadas" />
       <Footer />
     </>

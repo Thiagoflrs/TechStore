@@ -26,7 +26,6 @@ const mapProduto = (produto) => {
     price: produto.Valor,
     oldPrice: null,
     image: getImageById(produto.ProdutoId),
-    installment: "ou 3x sem juros",
     stock: produto.Quantidade,
     categoriaId: produto.CategoriaId,
   };
