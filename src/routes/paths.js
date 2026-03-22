@@ -4,7 +4,7 @@ export const paths = {
     home: "/",
     auth: "/auth",
     payments: "/payments",
-    productDetails: "/product"
+    productDetails: "/product/:id"
   }
 
 };

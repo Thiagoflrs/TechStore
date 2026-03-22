@@ -1,37 +1,51 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import "./ProductDetails.css";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Header from "../../components/header/Header";
 import Footer from "../../components/footer/Footer";
 import RecommendedBrands from "../../components/BrandCard/RecommendedBrands";
-import rdZeus from "../../assets/images/phones/rdZeus.webp";
+import { getProdutoById } from "../../services/productService";
+import { paths } from "../../routes/paths";
 
 export default function ProductDetails() {
   const { id } = useParams();
+
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [zoomStyle, setZoomStyle] = useState({});
   const [showZoom, setShowZoom] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  const product = {
-    id,
-    name: "Headset Redragon Zeus X RGB",
-    price: 502.5,
-    description:
-      "Headset gamer com som surround 7.1, RGB personalizável e microfone com cancelamento de ruído.",
-    image: rdZeus,
-    stock: 12,
-    brand: "Redragon",
-  };
+  useEffect(() => {
+    const fetchProduto = async () => {
+      try {
+        const data = await getProdutoById(Number(id));
+
+        const productWithExtras = {
+          ...data,
+          description:
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+          brand: "TechStore",
+          stock: data.stock ?? 0,
+        };
+
+        setProduct(productWithExtras);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduto();
+  }, [id]);
 
   const formatPrice = (value) =>
     value.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
     });
-
-  const pixPrice = product.price * 0.9;
 
   const handleMouseMove = (e) => {
     if (!showZoom) return;
@@ -47,6 +61,12 @@ export default function ProductDetails() {
     });
   };
 
+  if (loading) return <p style={{ padding: "40px" }}>Carregando...</p>;
+  if (!product) return <p style={{ padding: "40px" }}>Produto não encontrado</p>;
+
+  const pixPrice = product.price * 0.9;
+  const isOutOfStock = product.stock === 0;
+
   return (
     <>
       <Header />
@@ -54,7 +74,7 @@ export default function ProductDetails() {
       <div className="details-container">
         <div className="details-wrapper">
 
-          {/* IMAGEM COM ZOOM + DRAG */}
+          {/* IMAGEM */}
           <div
             className="image-section"
             onMouseMove={handleMouseMove}
@@ -80,7 +100,7 @@ export default function ProductDetails() {
             )}
           </div>
 
-          {/* INFORMAÇÕES */}
+          {/* INFO */}
           <div className="info">
             <h1>{product.name}</h1>
 
@@ -110,10 +130,24 @@ export default function ProductDetails() {
 
             {/* BOTÕES */}
             <div className="buy-box">
-              <Link to="/Payments"
-                className="buy-btn">Comprar agora
+              
+              <Link
+                to={isOutOfStock ? "#" : paths.public.payments}
+                className={`buy-btn ${isOutOfStock ? "disabled" : ""}`}
+                onClick={(e) => {
+                  if (isOutOfStock) e.preventDefault();
+                }}
+              >
+                {isOutOfStock ? "Indisponível" : "Comprar agora"}
               </Link>
-              <button className="cart-btn">Adicionar ao carrinho</button>
+
+              {/* 🔥 Carrinho */}
+              <button
+                className="cart-btn"
+                disabled={isOutOfStock}
+              >
+                Adicionar ao carrinho
+              </button>
             </div>
 
             {/* BENEFÍCIOS */}
@@ -126,7 +160,8 @@ export default function ProductDetails() {
 
         </div>
       </div>
-      <RecommendedBrands title="Marcas Recomendadas"/>
+
+      <RecommendedBrands title="Marcas Recomendadas" />
       <Footer />
     </>
   );

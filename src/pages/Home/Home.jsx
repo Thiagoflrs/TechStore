@@ -10,10 +10,6 @@ import Banner2 from "../../assets/images/banners/banner2.webp";
 import Banner3 from "../../assets/images/banners/banner3.webp";
 import Banner4 from "../../assets/images/banners/banner4.webp";
 import Banner5 from "../../assets/images/banners/banner5.webp";
-import gamerProducts from "../../components/ProductSection/gamerProducts"
-import peripheralProducts from "../../components/ProductSection/peripheralProducts"
-import offersProducts from "../../components/ProductSection/offersProducts"
-import acessoryProducts from "../../components/ProductSection/acessoryProducts"
 import Footer from "../../components/footer/Footer";
 
 function Home() {
@@ -22,13 +18,13 @@ function Home() {
       <Header />
       <Banner />
       <Categories title="Confira nossas Categorias" />
-      <ProductSection title="Em oferta" products={offersProducts} />
+      <ProductSection title="Em oferta"/>
       <SectionDivider images={[Banner0]} />
-      <ProductSection title="Gamer" products={gamerProducts} />
+      <ProductSection title="Gamer"/>
       <SectionDivider images={[Banner1, Banner2]} />
-      <ProductSection title="Periféricos" products={peripheralProducts} />
+      <ProductSection title="Periféricos"/>
       <SectionDivider images={[Banner3, Banner4, Banner5]} />
-      <ProductSection title="Acessórios" products={acessoryProducts} />
+      <ProductSection title="Acessórios"/>
       <RecommendedBrands title="Marcas Recomendadas" />
       <Footer />
     </>
