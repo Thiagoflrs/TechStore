@@ -98,7 +98,7 @@ function Header() {
               animate={cartCount > 0 ? { scale: [1, 1.4, 1] } : {}}
               transition={{ duration: 0.3 }}
             >
-              <ShoppingBasket size={26} strokeWidth={2.5} color="#007bff" />
+              <ShoppingBasket size={26} strokeWidth={2.5} color="#0F172A" />
             </motion.div>
             {cartCount > 0 && (
               <span className="cart-badge">{cartCount}</span>

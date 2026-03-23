@@ -10,11 +10,12 @@ import {
   Cable,
   Laptop,
   ToyBrick,
+  ShoppingBag,
 } from "lucide-react";
 
 const iconMap = {
   Smartphone: Smartphone,
-  Acessorios: Headphones,
+  Acessorios: ShoppingBag,
   Carregadores: HardDrive,
   "Fones de Ouvido": Headphones,
   Mouses: Mouse,

@@ -5,12 +5,18 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../../hooks/useAuth"; 
 import Swal from "sweetalert2";
 import 'sweetalert2/dist/sweetalert2.min.css';
+import { useNavigate, useLocation } from "react-router-dom";
 
 function LoginForm() {
   const { form, errors, handleChange, handleSubmit } = useForm(
     { email: "", senha: "" },
     validateLogin
   );
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from || "/";
 
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -31,7 +37,7 @@ function LoginForm() {
         showConfirmButton: false,
       });
 
-      window.location.href = "/";
+      navigate(from, { replace: true});
     } catch (error) {
       const msg = error.message || "Email ou senha inválidos";
 

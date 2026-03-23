@@ -10,7 +10,7 @@
   background-position: center;
   border-radius: 10px;
   position: relative;
-  cursor: pointer;
+  cursor:text;
   transition: transform .25s;
 }
 

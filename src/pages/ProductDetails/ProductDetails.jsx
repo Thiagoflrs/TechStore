@@ -1,5 +1,7 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import "./ProductDetails.css";
+import { useProtectedAction } from "../../hooks/useProtectedAction"
+import { ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import Header from "../../components/header/Header";
 import Footer from "../../components/footer/Footer";
@@ -13,6 +15,8 @@ export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+
+  const { handleAction } = useProtectedAction();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -61,14 +65,17 @@ export default function ProductDetails() {
   };
 
   const handleBuyNow = () => {
+    handleAction(() => {
     if (product && product.stock > 0) {
       addToCart(product);
       navigate(paths.public.payments);
     }
-  };
+  })
+};
 
   if (loading) return <p style={{ padding: "40px" }}>Carregando...</p>;
-  if (!product) return <p style={{ padding: "40px" }}>Produto não encontrado</p>;
+  if (!product)
+    return <p style={{ padding: "40px" }}>Produto não encontrado</p>;
 
   const pixPrice = product.price * 0.9;
   const isOutOfStock = product.stock === 0;
@@ -78,6 +85,9 @@ export default function ProductDetails() {
       <Header />
       <FlyToCart isAnimating={isFlying} productImage={product.image} />
       <div className="details-container">
+        <Link to="/" className="cat-back">
+          <ArrowLeft size={16} /> Voltar
+        </Link>
         <div className="details-wrapper">
           <div
             className="image-section"

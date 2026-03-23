@@ -26,7 +26,7 @@ function ProductSection({ title, categoriasIds }) {
     };
 
     fetchProdutos();
-  }, [categoriasIds]); // ✅ CORRETO
+  }, [categoriasIds]);
 
   return (
     <section style={{ padding: "40px" }}>

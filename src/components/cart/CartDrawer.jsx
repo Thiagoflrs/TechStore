@@ -2,11 +2,14 @@ import { useCart } from "../../context/CartContext";
 import { X, ShoppingBag, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { paths } from "../../routes/paths";
+import { useProtectedAction } from "../../hooks/useProtectedAction"
 import "./CartDrawer.css";
 
 export default function CartDrawer({ isOpen, onClose }) {
   const { cart, cartCount } = useCart();
   const navigate = useNavigate();
+
+  const { handleAction } = useProtectedAction();
 
   const formatPrice = (value) =>
     value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -14,8 +17,10 @@ export default function CartDrawer({ isOpen, onClose }) {
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   const handleCheckout = () => {
+    handleAction(() => {
     onClose();
     navigate(paths.public.payments);
+    })
   };
 
   if (!isOpen) return null;
@@ -25,7 +30,7 @@ export default function CartDrawer({ isOpen, onClose }) {
       <div className="drawer-content" onClick={(e) => e.stopPropagation()}>
         <div className="drawer-header">
           <div className="header-title">
-            <ShoppingBag size={22} color="#00ff88" />
+            <ShoppingBag size={22} color="#3B82F6" />
             <h2>Seu Carrinho</h2>
           </div>
           <button onClick={onClose} className="close-btn"><X size={24} /></button>

@@ -1,5 +1,5 @@
 import "./ProductCard.css";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingBasket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function ProductCard({ product }) {
@@ -43,7 +43,7 @@ function ProductCard({ product }) {
         className="buy-button"
         onClick={() => navigate(`/product/${product.id}`)}
       >
-        <ShoppingCart size={20} />
+        <ShoppingBasket size={20} />
         Comprar
       </button>
     </div>
