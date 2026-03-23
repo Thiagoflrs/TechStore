@@ -1,29 +1,11 @@
+import { getImageById } from "../services/imageService"
 const API_URL = "http://localhost:5248/api/Produtos"
 
-const images = import.meta.glob("../assets/images/produtos/*", {
-  eager: true,
-});
-
-import defaultImage from "../assets/images/produtos/default.jpg";
-
-const getImageById = (id) => {
-  const extensions = ["webp", "jpg", "png"];
-
-  for (let ext of extensions) {
-    const path = `../assets/images/produtos/${id}.${ext}`;
-    if (images[path]) {
-      return images[path].default;
-    }
-  }
-
-  return defaultImage;
-};
-
-const mapProduto = (produto) => {
+export const mapProduto = (produto) => {
   return {
     id: produto.ProdutoId,
     name: produto.Nome,
-    price: produto.Valor,
+    price: produto.Valor ?? 0,
     oldPrice: null,
     image: getImageById(produto.ProdutoId),
     stock: produto.Quantidade,

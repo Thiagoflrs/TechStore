@@ -40,15 +40,27 @@ const API_URL = "http://localhost:5248/api/Categorias";
 export const getCategories = async () => {
   try {
     const response = await fetch(API_URL);
-
     if (!response.ok) {
       throw new Error("Erro ao buscar categorias");
     }
-
     const data = await response.json();
     return data.map(mapCategories);
   } catch (error) {
     console.error("Erro no serviço:", error);
+    throw error;
+  }
+};
+
+export const getCategoryWithProducts = async (categoryName) => {
+  try {
+    const response = await fetch(
+      `${API_URL}/withproduct?name=${encodeURIComponent(categoryName)}`
+    );
+    if (!response.ok) {
+      throw new Error("Erro ao buscar produtos da categoria");
+    }
+    return await response.json();
+  } catch (error) {
     throw error;
   }
 };

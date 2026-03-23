@@ -1,57 +1,105 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { ShoppingBasket, ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
 import Header from "../../components/header/Header";
+import { getCategoryWithProducts } from "../../services/categorieService";
+import { mapProduto } from "../../services/productService";
 import "./Category.css";
 
 function Category() {
   const { nomeCategoria } = useParams();
+  const navigate = useNavigate();
 
-  const produtosBackEnd = [
-    { id: 1, nome: "Monitor Gamer Curvo 27'", categoria: "monitores", preco: 1299.90, imagem: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400" },
-    { id: 2, nome: "Teclado Mecânico RGB", categoria: "teclados", preco: 349.00, imagem: "https://images.unsplash.com/photo-1595225476474-87563907a212?w=400" },
-    { id: 3, nome: "Mouse Óptico Stealth", categoria: "mouse", preco: 189.90, imagem: "https://images.unsplash.com/photo-1527814050087-379381547969?w=400" },
-    { id: 4, nome: "Placa de Vídeo RTX 4060", categoria: "hardware", preco: 2599.00, imagem: "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=400" },
-    { id: 5, nome: "Headset Studio Pro", categoria: "periféricos", preco: 459.00, imagem: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=400" },
-    { id: 6, nome: "SSD NVMe 1TB", categoria: "armazenamento", preco: 520.00, imagem: "https://images.unsplash.com/photo-1597849005574-2018824f11fb?w=400" }
-  ];
+  const [products, setProducts] = useState([]);
+  const [categoryName, setCategoryName] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const produtosFiltrados = produtosBackEnd.filter(
-    (p) => p.categoria.toLowerCase() === (nomeCategoria || "").toLowerCase()
-  );
+  const formatPrice = (value) =>
+    (value ?? 0).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+
+  useEffect(() => {
+    if (!nomeCategoria) return;
+
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const data = await getCategoryWithProducts(nomeCategoria);
+
+        const category = data.find(
+          (c) => c.Nome.toLowerCase() === nomeCategoria.toLowerCase()
+        );
+
+        if (!category) {
+          setCategoryName(nomeCategoria);
+          setProducts([]);
+          return;
+        }
+
+        setCategoryName(category.Nome);
+
+        const formattedProducts = (category.Produtos || []).map(mapProduto);
+        setProducts(formattedProducts);
+      } catch (error) {
+        console.error("Erro ao buscar produtos:", error);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [nomeCategoria]);
 
   return (
     <div className="cat-page">
       <Header />
+
       <main className="cat-container">
         <div className="cat-header">
           <Link to="/" className="cat-back">
             <ArrowLeft size={16} /> Voltar
           </Link>
-          <h1 className="cat-title">{nomeCategoria}</h1>
+
+          <h1 className="cat-title">{categoryName}</h1>
         </div>
 
-        <div className="cat-grid">
-          {produtosFiltrados.map((item) => (
-            <div key={item.id} className="cat-card">
-              <div className="cat-img-box">
-                <img src={item.imagem} alt={item.nome} />
-              </div>
-              <div className="cat-txt-box">
-                <h3 title={item.nome}>{item.nome}</h3>
-                <p className="cat-price">R$ {item.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                <button className="cat-buy-btn">
-                  <ShoppingBasket size={18} />
-                  Comprar
-                </button>
-              </div>
+        {loading ? (
+          <p>Carregando produtos...</p>
+        ) : (
+          <>
+            <div className="cat-grid">
+              {products.map((item) => (
+                <div key={item.id} className="cat-card">
+                  <div className="cat-img-box">
+                    <img src={item.image} alt={item.name} />
+                  </div>
+
+                  <div className="cat-txt-box">
+                    <h3 title={item.name}>{item.name}</h3>
+
+                    <p className="cat-price">{formatPrice(item.price)}</p>
+
+                    <button
+                      className="cat-buy-btn"
+                      onClick={() => navigate(`/product/${item.id}`)}
+                    >
+                      <ShoppingBasket size={18} />
+                      Comprar
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {produtosFiltrados.length === 0 && (
-          <div className="cat-empty">
-            <p>Nenhum produto encontrado.</p>
-          </div>
+            {products.length === 0 && (
+              <div className="cat-empty">
+                <p>Nenhum produto encontrado.</p>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

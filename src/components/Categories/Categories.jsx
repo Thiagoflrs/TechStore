@@ -62,7 +62,7 @@ function Categories({ title }) {
             return (
               <SwiperSlide key={`${cat.id || cat.name}-${index}`}>
                 <Link
-                  to={`/categoria/${cat.name.toLowerCase()}`}
+                  to={`/categoria/${cat.name}`}
                   style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <div className="category-item">

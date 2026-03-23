@@ -14,7 +14,7 @@ function AppRoutes() {
         <Route path={paths.public.auth} element={<Auth />} />
         <Route path={paths.public.payments} element={<Payments />} />
         <Route path={paths.public.productDetails} element={<Product />} />
-        <Route path="/categoria/:nomeCategoria" element={<Category />} />
+        <Route path={paths.public.categoryName} element={<Category />} />
         <Route path="*" element={<Home />} />
       </Routes>
     </BrowserRouter>

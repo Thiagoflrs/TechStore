@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import "./ProductDetails.css";
-import { useProtectedAction } from "../../hooks/useProtectedAction"
+import { useProtectedAction } from "../../hooks/useProtectedAction";
 import { ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import Header from "../../components/header/Header";
@@ -31,7 +31,8 @@ export default function ProductDetails() {
         const data = await getProdutoById(Number(id));
         const productWithExtras = {
           ...data,
-          description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+          description:
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatu",
           brand: "TechStore",
           stock: data.stock ?? 0,
         };
@@ -50,7 +51,8 @@ export default function ProductDetails() {
 
   const handleMouseMove = (e) => {
     if (!showZoom) return;
-    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const { left, top, width, height } =
+      e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - left) / width) * 100;
     const y = ((e.clientY - top) / height) * 100;
     setZoomStyle({ backgroundPosition: `${x}% ${y}%` });
@@ -66,12 +68,12 @@ export default function ProductDetails() {
 
   const handleBuyNow = () => {
     handleAction(() => {
-    if (product && product.stock > 0) {
-      addToCart(product);
-      navigate(paths.public.payments);
-    }
-  })
-};
+      if (product && product.stock > 0) {
+        addToCart(product);
+        navigate(paths.public.payments);
+      }
+    });
+  };
 
   if (loading) return <p style={{ padding: "40px" }}>Carregando...</p>;
   if (!product)
@@ -114,14 +116,20 @@ export default function ProductDetails() {
           </div>
           <div className="info">
             <h1>{product.name}</h1>
-            <span className="brand">Marca: <strong>{product.brand}</strong></span>
+            <span className="brand">
+              Marca: <strong>{product.brand}</strong>
+            </span>
             <p className="description">{product.description}</p>
             <div className="price-boxDetails">
               <h2 className="price-details">{formatPrice(product.price)}</h2>
-              <span className="pix">ou {formatPrice(pixPrice)} no PIX (10% OFF)</span>
+              <span className="pix">
+                ou {formatPrice(pixPrice)} no PIX (10% OFF)
+              </span>
             </div>
             <p className={`stock ${product.stock > 0 ? "ok" : "out"}`}>
-              {product.stock > 0 ? `✔ Em estoque (${product.stock} unidades)` : "✖ Indisponível"}
+              {product.stock > 0
+                ? `✔ Em estoque (${product.stock} unidades)`
+                : "✖ Indisponível"}
             </p>
             <div className="buy-box">
               <button

@@ -4,7 +4,8 @@ export const paths = {
     home: "/",
     auth: "/auth",
     payments: "/payments",
-    productDetails: "/product/:id"
+    productDetails: "/product/:id",
+    categoryName: "/categoria/:nomeCategoria"
   }
 
 };
