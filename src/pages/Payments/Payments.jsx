@@ -4,14 +4,15 @@ import {
   validateCreditCard,
   validateExpiryDate,
 } from "../../utils/cardValidator";
-import { FaQrcode, FaCreditCard } from "react-icons/fa";
+import { FaQrcode, FaCreditCard, FaShoppingBag } from "react-icons/fa";
 import VisualCard from "./VisualCard";
 import Header from "../../components/header/Header";
 import Footer from "../../components/footer/Footer";
 import RecommendedBrands from "../../components/BrandCard/RecommendedBrands";
-
+import { useCart } from "../../context/CartContext";
 
 function Pagamento() {
+  const { cart } = useCart();
   const [metodo, setMetodo] = useState("credito");
   const [analise, setAnalise] = useState(false);
   const [tempo, setTempo] = useState(300);
@@ -26,6 +27,8 @@ function Pagamento() {
   });
 
   const [validacao, setValidacao] = useState({ cartao: null, data: null });
+
+  const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   useEffect(() => {
     let timer;
@@ -70,7 +73,7 @@ function Pagamento() {
         <div className="card shadow-lg p-5 text-center">
           <h1 className="text-primary">Pagamento em análise</h1>
           <p>Aguarde enquanto processamos seus dados...</p>
-          <div className="spinner"></div> {/* Sugestão de feedback visual */}
+          <div className="spinner"></div>
         </div>
       </div>
     );
@@ -82,7 +85,6 @@ function Pagamento() {
 
       <div className="container">
         <div className="card layout">
-          {/* SEÇÃO DE SELEÇÃO (ESQUERDA) */}
           <div className="lado-esquerdo">
             <h2>Pagamento</h2>
 
@@ -99,17 +101,39 @@ function Pagamento() {
             >
               <FaCreditCard /> Cartão
             </button>
+
+            <div className="resumo-pagamento">
+              <div className="resumo-header">
+                <FaShoppingBag color="#00ff88" />
+                <span>Resumo do Pedido</span>
+              </div>
+              <div className="resumo-lista">
+                {cart.map((item) => (
+                  <div key={item.id} className="resumo-item">
+                    <span>{item.quantity}x {item.name}</span>
+                    <span>{(item.price * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="resumo-total">
+                <span>Total:</span>
+                <strong>{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
+              </div>
+            </div>
           </div>
 
-          {/* SEÇÃO DE CONTEÚDO (DIREITA) */}
           <div className="lado-direito">
             {metodo === "pix" ? (
               <div className="info">
                 <img
                   className="qrcode"
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=PixTechStore"
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=Pix_Total_${total}`}
                   alt="QR Code Pix"
                 />
+
+                <p className="total-pix-display">
+                  Valor a pagar: <strong>{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
+                </p>
 
                 <p>
                   Expira em:{" "}
@@ -125,7 +149,6 @@ function Pagamento() {
               </div>
             ) : (
               <div className="info">
-                {/* COMPONENTE VISUAL DO CARTÃO */}
                 <VisualCard
                   numero={dados.numero}
                   nome={dados.nome}
@@ -136,7 +159,6 @@ function Pagamento() {
                   validacao={validacao}
                 />
 
-                {/* FORMULÁRIO DE ENTRADA */}
                 <div className="formulario-cartao">
                   <input
                     name="numero"
@@ -191,7 +213,7 @@ function Pagamento() {
                       !validacao.cartao?.valid || !validacao.data?.valid
                     }
                   >
-                    Finalizar Pagamento
+                    Pagar {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </button>
                 </div>
               </div>

@@ -6,9 +6,12 @@ import Footer from "../../components/footer/Footer";
 import RecommendedBrands from "../../components/BrandCard/RecommendedBrands";
 import { getProdutoById } from "../../services/productService";
 import { paths } from "../../routes/paths";
+import { useCart } from "../../context/CartContext";
+import FlyToCart from "../../components/cart/FlyToCart";
 
 export default function ProductDetails() {
   const { id } = useParams();
+  const { addToCart } = useCart();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,6 +19,8 @@ export default function ProductDetails() {
   const [zoomStyle, setZoomStyle] = useState({});
   const [showZoom, setShowZoom] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  
+  const [isFlying, setIsFlying] = useState(false);
 
   useEffect(() => {
     const fetchProduto = async () => {
@@ -61,6 +66,14 @@ export default function ProductDetails() {
     });
   };
 
+  const handleAddToCart = () => {
+    if (product && product.stock > 0) {
+      addToCart(product);
+      setIsFlying(true);
+      setTimeout(() => setIsFlying(false), 800);
+    }
+  };
+
   if (loading) return <p style={{ padding: "40px" }}>Carregando...</p>;
   if (!product) return <p style={{ padding: "40px" }}>Produto não encontrado</p>;
 
@@ -70,11 +83,12 @@ export default function ProductDetails() {
   return (
     <>
       <Header />
+      
+      <FlyToCart isAnimating={isFlying} productImage={product.image} />
 
       <div className="details-container">
         <div className="details-wrapper">
 
-          {/* IMAGEM */}
           <div
             className="image-section"
             onMouseMove={handleMouseMove}
@@ -100,7 +114,6 @@ export default function ProductDetails() {
             )}
           </div>
 
-          {/* INFO */}
           <div className="info">
             <h1>{product.name}</h1>
 
@@ -110,7 +123,6 @@ export default function ProductDetails() {
 
             <p className="description">{product.description}</p>
 
-            {/* PREÇO */}
             <div className="price-boxDetails">
               <h2 className="price-details">
                 {formatPrice(product.price)}
@@ -121,14 +133,12 @@ export default function ProductDetails() {
               </span>
             </div>
 
-            {/* ESTOQUE */}
             <p className={`stock ${product.stock > 0 ? "ok" : "out"}`}>
               {product.stock > 0
                 ? `✔ Em estoque (${product.stock} unidades)`
                 : "✖ Indisponível"}
             </p>
 
-            {/* BOTÕES */}
             <div className="buy-box">
               
               <Link
@@ -141,16 +151,15 @@ export default function ProductDetails() {
                 {isOutOfStock ? "Indisponível" : "Comprar agora"}
               </Link>
 
-              {/* 🔥 Carrinho */}
               <button
                 className="cart-btn"
                 disabled={isOutOfStock}
+                onClick={handleAddToCart} 
               >
                 Adicionar ao carrinho
               </button>
             </div>
 
-            {/* BENEFÍCIOS */}
             <div className="benefits">
               <div>🚚 Frete rápido</div>
               <div>🔒 Compra segura</div>

@@ -1,13 +1,19 @@
 import { Search, ShoppingBasket, User, Heart, Headset, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "../../hooks/useAuth";
+import { useCart } from "../../context/CartContext";
+import CartDrawer from "../cart/CartDrawer";
 import "./Header.css";
 import Swal from "sweetalert2";
 import 'sweetalert2/dist/sweetalert2.min.css';
 
 function Header() {
   const { user, logout } = useAuth();
+  const { cartCount } = useCart();
   const navigate = useNavigate();
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -72,11 +78,29 @@ function Header() {
             <Heart size={24} />
           </Link>
 
-          <button className="cart" title="Carrinho">
-            <ShoppingBasket size={26} strokeWidth={2.5} color="#00ff88" />
+          <button 
+            type="button"
+            className="cart" 
+            title="Carrinho" 
+            onClick={() => setIsCartOpen(true)}
+            style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            <motion.div
+              key={cartCount}
+              initial={{ scale: 1 }}
+              animate={cartCount > 0 ? { scale: [1, 1.4, 1] } : {}}
+              transition={{ duration: 0.3 }}
+            >
+              <ShoppingBasket size={26} strokeWidth={2.5} color="#00ff88" />
+            </motion.div>
+            {cartCount > 0 && (
+              <span className="cart-badge">{cartCount}</span>
+            )}
           </button>
         </div>
       </div>
+
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </header>
   );
 }

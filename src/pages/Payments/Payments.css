@@ -259,3 +259,51 @@ input:focus {
   .card.layout { width: 95%; flex-direction: column; }
   .lado-esquerdo { width: 100%; flex-direction: row; padding: 20px; }
 }
+
+.resumo-pagamento {
+  margin-top: 30px;
+  padding: 20px;
+  background: #111;
+  border-radius: 8px;
+  border: 1px solid #222;
+}
+
+.resumo-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.resumo-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 10px;
+}
+
+.resumo-total {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #333;
+  color: #00ff88;
+}
+
+.resumo-total strong {
+  font-size: 1.3rem;
+}
+
+.total-pix-display {
+  font-size: 1.2rem;
+  margin: 20px 0;
+  color: #fff;
+}
+
+.total-pix-display strong {
+  color: #00ff88;
+}
