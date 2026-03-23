@@ -1,33 +1,50 @@
-.header{
-  background: var(--primary);
-  padding: 15px 0;
-  color: white;
+:root {
+  --primary: #007bff;
 }
 
-.header-container{
-  width: 90%;
-  max-width: 1400px;
-  margin: auto;
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  background-color: var(--primary);
+  color: white;
+  transition: padding 0.3s ease;
+  padding: 20px 0;
+}
+
+.header.scrolled {
+  padding: 10px 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
   display: flex;
-  justify-content: space-around;
   align-items: center;
+  justify-content: space-between;
 }
 
 .logo {
   font-size: 1.8rem;
   font-weight: 800;
   color: #fff;
-  margin-bottom: 15px;
+  text-decoration: none;
 }
 
 .logo span {
-  color: var(--secondary);
+  color: #ade8ff;
 }
 
 .search {
   position: relative; 
   width: 100%;
   max-width: 500px;
+  display: flex;
+  align-items: center;
 }
 
 .search input {
@@ -35,58 +52,57 @@
   outline: none;
   width: 100%;
   font-size: 14px;
-  padding: 8px 10px 8px 40px; 
+  padding: 10px 15px 10px 45px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.search input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .search-icon {
   position: absolute;       
-  left: 10px;               
-  top: 35%;
+  left: 15px;               
+  top: 50%;
   transform: translateY(-50%);
-  color: var(--primary);
-  pointer-events: none;     
+  color: white;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
 }
 
-.actions{
-  display:flex;
+.actions {
+  display: flex;
   align-items: center;
   gap: 25px;
 }
 
 .action-item {
-  display: flex;
-  align-items: center;
   color: white;
   text-decoration: none;
-  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
 }
 
-.action-item:hover {
-  opacity: 0.8;
-}
-
-.login, .login-logged{
+.login, .login-logged {
   display: flex;
   align-items: center;
   gap: 10px;
-  text-decoration: none;
   color: white;
+  text-decoration: none;
 }
 
-.login-text{
+.login-text {
   display: flex;
   flex-direction: column;
-  font-size: 12px;
-  line-height: 1.2;
+  font-size: 11px;
 }
 
-.login-text strong{
-  font-size: 13px;
-}
-
-.login-icon{
+.login-icon {
   background-color: white;
-  padding: 4px;
+  padding: 6px;
   border-radius: 50%;
   color: var(--primary);
   display: flex;
@@ -94,60 +110,42 @@
   justify-content: center;
 }
 
-.logout-button{
-  background: var(--secondary);
-  border: none;
-  padding: 6px 10px;
-  border-radius: 5px;
-  color: white;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: opacity 0.2s;
-}
-
-.logout-button:hover{
-  opacity: 0.8;
-}
-
-.cart{
+.cart {
   position: relative;
-  background: var(--cta);
+  background: white;
   border: none;
   padding: 10px;
-  border-radius: 50%;
+  border-radius: 12px;
   cursor: pointer;
-  color: white;
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.cart-count{
+.cart-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: -8px;
+  right: -8px;
+  background-color: #ff4d4f;
   color: white;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  border: 2px solid var(--primary);
+}
+
+.logout-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: white;
   font-size: 12px;
-}
-
-.login-logged .login-text{
-  text-align: right;
-}
-
-.login-logged span{
-  font-size: 13px;
-}
-
-.login-logged strong{
-  font-size: 13px;
-  color: var(--secondary);
+  cursor: pointer;
 }

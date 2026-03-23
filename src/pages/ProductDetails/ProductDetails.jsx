@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import "./ProductDetails.css";
 import { useState, useEffect } from "react";
 import Header from "../../components/header/Header";
@@ -11,30 +11,26 @@ import FlyToCart from "../../components/cart/FlyToCart";
 
 export default function ProductDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { addToCart } = useCart();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-
   const [zoomStyle, setZoomStyle] = useState({});
   const [showZoom, setShowZoom] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  
   const [isFlying, setIsFlying] = useState(false);
 
   useEffect(() => {
     const fetchProduto = async () => {
       try {
         const data = await getProdutoById(Number(id));
-
         const productWithExtras = {
           ...data,
-          description:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+          description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
           brand: "TechStore",
           stock: data.stock ?? 0,
         };
-
         setProduct(productWithExtras);
       } catch (error) {
         console.error(error);
@@ -42,28 +38,18 @@ export default function ProductDetails() {
         setLoading(false);
       }
     };
-
     fetchProduto();
   }, [id]);
 
   const formatPrice = (value) =>
-    value.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    });
+    value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const handleMouseMove = (e) => {
     if (!showZoom) return;
-
-    const { left, top, width, height } =
-      e.currentTarget.getBoundingClientRect();
-
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - left) / width) * 100;
     const y = ((e.clientY - top) / height) * 100;
-
-    setZoomStyle({
-      backgroundPosition: `${x}% ${y}%`,
-    });
+    setZoomStyle({ backgroundPosition: `${x}% ${y}%` });
   };
 
   const handleAddToCart = () => {
@@ -71,6 +57,13 @@ export default function ProductDetails() {
       addToCart(product);
       setIsFlying(true);
       setTimeout(() => setIsFlying(false), 800);
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (product && product.stock > 0) {
+      addToCart(product);
+      navigate(paths.public.payments);
     }
   };
 
@@ -83,12 +76,9 @@ export default function ProductDetails() {
   return (
     <>
       <Header />
-      
       <FlyToCart isAnimating={isFlying} productImage={product.image} />
-
       <div className="details-container">
         <div className="details-wrapper">
-
           <div
             className="image-section"
             onMouseMove={handleMouseMove}
@@ -101,7 +91,6 @@ export default function ProductDetails() {
             onMouseUp={() => setIsDragging(false)}
           >
             <img src={product.image} alt={product.name} />
-
             {showZoom && (
               <div
                 className="zoom-lens"
@@ -113,62 +102,40 @@ export default function ProductDetails() {
               />
             )}
           </div>
-
           <div className="info">
             <h1>{product.name}</h1>
-
-            <span className="brand">
-              Marca: <strong>{product.brand}</strong>
-            </span>
-
+            <span className="brand">Marca: <strong>{product.brand}</strong></span>
             <p className="description">{product.description}</p>
-
             <div className="price-boxDetails">
-              <h2 className="price-details">
-                {formatPrice(product.price)}
-              </h2>
-
-              <span className="pix">
-                ou {formatPrice(pixPrice)} no PIX (10% OFF)
-              </span>
+              <h2 className="price-details">{formatPrice(product.price)}</h2>
+              <span className="pix">ou {formatPrice(pixPrice)} no PIX (10% OFF)</span>
             </div>
-
             <p className={`stock ${product.stock > 0 ? "ok" : "out"}`}>
-              {product.stock > 0
-                ? `✔ Em estoque (${product.stock} unidades)`
-                : "✖ Indisponível"}
+              {product.stock > 0 ? `✔ Em estoque (${product.stock} unidades)` : "✖ Indisponível"}
             </p>
-
             <div className="buy-box">
-              
-              <Link
-                to={isOutOfStock ? "#" : paths.public.payments}
+              <button
                 className={`buy-btn ${isOutOfStock ? "disabled" : ""}`}
-                onClick={(e) => {
-                  if (isOutOfStock) e.preventDefault();
-                }}
+                disabled={isOutOfStock}
+                onClick={handleBuyNow}
               >
                 {isOutOfStock ? "Indisponível" : "Comprar agora"}
-              </Link>
-
+              </button>
               <button
                 className="cart-btn"
                 disabled={isOutOfStock}
-                onClick={handleAddToCart} 
+                onClick={handleAddToCart}
               >
                 Adicionar ao carrinho
               </button>
             </div>
-
             <div className="benefits">
               <div>🚚 Frete rápido</div>
               <div>🔒 Compra segura</div>
             </div>
           </div>
-
         </div>
       </div>
-
       <RecommendedBrands title="Marcas Recomendadas" />
       <Footer />
     </>

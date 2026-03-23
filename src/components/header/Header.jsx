@@ -1,6 +1,6 @@
 import { Search, ShoppingBasket, User, Heart, Headset, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../context/CartContext";
@@ -14,6 +14,15 @@ function Header() {
   const { cartCount } = useCart();
   const navigate = useNavigate();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -37,14 +46,14 @@ function Header() {
   };
 
   return (
-    <header className="header">
+    <header className={`header ${scrolled ? "scrolled" : ""}`}>
       <div className="header-container">
         <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'contents' }}>
           <h2 className="logo">Tech<span>Store</span></h2>
         </Link>
 
         <div className="search">
-          <Search size={16} className="search-icon" />
+          <Search size={18} className="search-icon" />
           <input type="text" placeholder="Buscar produtos..." />
         </div>
 
@@ -70,20 +79,18 @@ function Header() {
             </Link>
           )}
 
-          <Link to="/atendimento" className="action-item" title="Atendimento ao Cliente">
+          <Link to="/atendimento" className="action-item">
             <Headset size={24} />
           </Link>
 
-          <Link to="/favoritos" className="action-item" title="Meus favoritos">
+          <Link to="/favoritos" className="action-item">
             <Heart size={24} />
           </Link>
 
           <button 
             type="button"
             className="cart" 
-            title="Carrinho" 
             onClick={() => setIsCartOpen(true)}
-            style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer' }}
           >
             <motion.div
               key={cartCount}
@@ -91,7 +98,7 @@ function Header() {
               animate={cartCount > 0 ? { scale: [1, 1.4, 1] } : {}}
               transition={{ duration: 0.3 }}
             >
-              <ShoppingBasket size={26} strokeWidth={2.5} color="#00ff88" />
+              <ShoppingBasket size={26} strokeWidth={2.5} color="#007bff" />
             </motion.div>
             {cartCount > 0 && (
               <span className="cart-badge">{cartCount}</span>
