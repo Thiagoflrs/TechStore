@@ -96,7 +96,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                   <h4>{item.name}</h4>
                   <div className="item-price-info">
                     <span>{item.quantity}x</span>
-                    <strong className="green-text">{formatPrice(item.price)}</strong>
+                    <strong className="text-price">{formatPrice(item.price)}</strong>
                   </div>
                 </div>
                 <div className="item-actions">

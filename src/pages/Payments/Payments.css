@@ -156,8 +156,8 @@ body {
   font-size: 1.4rem;
 }
 
-.green-text {
-  color: #2e7d32;
+.text-price {
+  color: var(--cta);
 }
 
 .kb-action-buttons {

@@ -104,12 +104,10 @@ function Pagamento() {
       setAnalise(true);
       const tipoParaAPI = metodoAtivo.toUpperCase();
 
-      // Envia para o Back-end (C#) processar o pedido/e-mail
       await concluirPedido(pedido.id, tipoParaAPI);
 
-      // Se for Pix, mostramos o QR Code estático antes de limpar tudo
       if (tipoParaAPI === "PIX") {
-        setAnalise(false); // Para o loading para mostrar o Modal
+        setAnalise(false);
         await Swal.fire({
           title: "Pagamento via Pix",
           html: `
@@ -127,7 +125,6 @@ function Pagamento() {
           allowOutsideClick: false,
         });
       } else {
-        // Se for cartão (Crédito/Débito), apenas o alerta de sucesso normal
         await Swal.fire({
           icon: "success",
           title: "Pagamento aprovado!",
@@ -137,7 +134,6 @@ function Pagamento() {
         });
       }
 
-      // Limpeza final e Redirecionamento
       localStorage.removeItem("pedidoId");
       localStorage.removeItem("pedidoItens");
       clearCart();
@@ -417,7 +413,7 @@ function Pagamento() {
               />
               <div className="kb-total-block">
                 <span>Total:</span>
-                <strong className="green-text">
+                <strong className="text-price">
                   {total.toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
