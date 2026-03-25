@@ -1,6 +1,6 @@
 import { Search, ShoppingBasket, User, Heart, Headset, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../context/CartContext";
@@ -15,42 +15,74 @@ function Header() {
   const navigate = useNavigate();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [perfil, setPerfil] = useState(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const carregarDadosUsuario = useCallback(async () => {
+    if (!user?.usuarioId || user.usuarioId === "null" || user.usuarioId === "undefined") {
+      setPerfil({ nome: "Usuário", saldo: 0 });
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:5248/api/Usuarios/GetInfoUsuario/${user.usuarioId}`, {
+        method: 'GET',
+        headers: { 
+          "Authorization": `Bearer ${user.token}`,
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPerfil({
+          nome: data.Nome ?? "Usuário", 
+          saldo: data.Saldo ?? 0
+        });
+      } else {
+        setPerfil({ nome: "Usuário", saldo: 0 });
+      }
+    } catch (error) {
+      setPerfil({ nome: "Usuário", saldo: 0 });
+    }
+  }, [user]);
+
+  useEffect(() => {
+    carregarDadosUsuario();
+  }, [carregarDadosUsuario]);
+
   const handleLogout = async () => {
     try {
-      const mensagem = await logout();
-      setUserId(null)
-
+      await logout();
+      setUserId(null);
+      setPerfil(null);
       await Swal.fire({
         icon: 'success',
         title: 'Sucesso!',
-        text: mensagem || "Logou realizado com sucesso|",        
+        text: "Logout realizado com sucesso!",
         timer: 1500,
-        timerProgressBar: true,
         showConfirmButton: false,
       });
       navigate("/");
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Ops...',
-        text: 'Erro ao sair. Tente novamente.',
-      });
+      Swal.fire({ icon: 'error', title: 'Ops...', text: 'Erro ao sair.' });
     }
+  };
+
+  const formatarMoeda = (valor) => {
+    const numero = Number(valor || 0);
+    return numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
 
   return (
     <header className={`header ${scrolled ? "scrolled" : ""}`}>
       <div className="header-container">
-        <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'contents' }}>
+        <Link to="/" className="logo-link">
           <h2 className="logo">Tech<span>Store</span></h2>
         </Link>
 
@@ -64,8 +96,8 @@ function Header() {
             <div className="login-logged">
               <User size={25} className="login-icon" />
               <div className="login-text">
-                <span>Olá, {user.nome}!</span>
-                <strong>Saldo: R$ {user.saldo.toFixed(2)}</strong>
+                <span>Olá, {perfil?.nome || "Carregando..."}!</span>
+                <strong>Saldo: {formatarMoeda(perfil?.saldo)}</strong>
               </div>
               <button onClick={handleLogout} className="logout-button" title="Sair">
                 <LogOut size={20} />
@@ -81,34 +113,20 @@ function Header() {
             </Link>
           )}
 
-          <Link to="/atendimento" className="action-item">
-            <Headset size={24} />
-          </Link>
+          <Link to="/atendimento" className="action-item"><Headset size={24} /></Link>
+          <Link to="/favoritos" className="action-item"><Heart size={24} /></Link>
 
-          <Link to="/favoritos" className="action-item">
-            <Heart size={24} />
-          </Link>
-
-          <button 
-            type="button"
-            className="cart" 
-            onClick={() => setIsCartOpen(true)}
-          >
+          <button className="cart" onClick={() => setIsCartOpen(true)}>
             <motion.div
-              key={cartCount}
-              initial={{ scale: 1 }}
               animate={cartCount > 0 ? { scale: [1, 1.4, 1] } : {}}
               transition={{ duration: 0.3 }}
             >
-              <ShoppingBasket size={26} strokeWidth={2.5} color="#0F172A" />
+              <ShoppingBasket size={26} strokeWidth={2.5} />
             </motion.div>
-            {cartCount > 0 && (
-              <span className="cart-badge">{cartCount}</span>
-            )}
+            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </button>
         </div>
       </div>
-
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </header>
   );

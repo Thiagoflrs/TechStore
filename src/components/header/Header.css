@@ -24,15 +24,25 @@
   justify-content: space-between;
 }
 
+.logo-link {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
 .logo {
   font-size: 1.8rem;
   font-weight: 800;
   color: #fff;
-  text-decoration: none;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
 }
 
 .logo span {
   color: #ade8ff;
+  line-height: 1;
 }
 
 .search {
@@ -47,6 +57,7 @@
   border: none;
   outline: none;
   width: 100%;
+  cursor: pointer;
   font-size: 14px;
   padding: 10px 15px 10px 45px;
   border-radius: 8px;

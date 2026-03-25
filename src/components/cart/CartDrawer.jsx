@@ -5,8 +5,6 @@ import { useState } from "react";
 import { paths } from "../../routes/paths";
 import { useProtectedAction } from "../../hooks/useProtectedAction";
 import { createOrder } from "../../services/orderService";
-import Swal from "sweetalert2";
-import "sweetalert2/dist/sweetalert2.min.css";
 import "./CartDrawer.css";
 
 export default function CartDrawer({ isOpen, onClose }) {
@@ -43,24 +41,11 @@ export default function CartDrawer({ isOpen, onClose }) {
         localStorage.setItem("pedidoId", pedidoId);
         localStorage.setItem("pedidoItens", JSON.stringify(cart));
 
-        await Swal.fire({
-          icon: "success",
-          title: "Pedido gerado!",
-          text: "Redirecionando para o pagamento...",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-
         onClose(); 
         navigate(paths.public.payments);
 
       } catch (error) {
         console.error("Erro ao criar pedido:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Ops...",
-          text: error.response?.data?.Mensagem || "Não foi possível gerar seu pedido.",
-        });
       } finally {
         setLoading(false);
       }

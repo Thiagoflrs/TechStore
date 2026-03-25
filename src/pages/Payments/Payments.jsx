@@ -353,6 +353,13 @@ function Pagamento() {
                         placeholder="0000 0000 0000 0000"
                         value={dadosCard.numero}
                         onChange={handleChangeCard}
+                        className={
+                          validacao.cartao?.valid
+                            ? "valid"
+                            : dadosCard.numero.length > 15
+                              ? "invalid"
+                              : ""
+                        }
                       />
                       <input
                         type="text"
@@ -368,6 +375,13 @@ function Pagamento() {
                           placeholder="MM/AA"
                           value={dadosCard.validade}
                           onChange={handleChangeCard}
+                          className={
+                            validacao.data?.valid
+                              ? "valid"
+                              : dadosCard.validade.length === 5
+                                ? "invalid"
+                                : ""
+                          }
                         />
                         <input
                           type="text"

@@ -1,3 +1,5 @@
+import { jwtDecode } from "jwt-decode";
+
 const API_URL = "http://localhost:5248/api/Usuarios";
 
 export const login = async (email, senha) => {
@@ -10,7 +12,7 @@ export const login = async (email, senha) => {
 
     const responseText = await response.text();
     let result = null;
-
+    
     try {
       result = responseText ? JSON.parse(responseText) : null;
     } catch (e) {
@@ -18,18 +20,28 @@ export const login = async (email, senha) => {
     }
 
     if (response.ok && result) {
+      let idFinal = result.UsuarioId || result.usuarioId || result.id || result.Id;
+
+      if (!idFinal && result.Token) {
+        try {
+          const decoded = jwtDecode(result.Token);
+          idFinal = decoded.user_id || decoded.sub;
+        } catch (decodeError) {
+          console.error("Erro ao decodificar token:", decodeError);
+        }
+      }
+
       return {
-        Token: result.Token,
-        Nome: result.Nome,
+        Token: result.Token || result.token,
+        Nome: result.Nome || result.nome,
         Saldo: result.Saldo ?? 0,
-        UsuarioId: result.UsuarioId || result.id || result.Id || null,
+        UsuarioId: idFinal,
       };
     } else {
-      const errorMsg = "E-mail ou senha inválidos.";
+      const errorMsg = result?.Mensagem || "E-mail ou senha inválidos.";
       throw new Error(errorMsg);
     }
   } catch (error) {
-    console.error("Erro no serviço de login:", error);
     throw error;
   }
 };
@@ -105,7 +117,6 @@ export const register = async (data) => {
 
     return responseData;
   } catch (error) {
-    console.error("Erro no registro:", error);
     throw error;
   }
 };
