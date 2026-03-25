@@ -1,7 +1,7 @@
 import "./Footer.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCcVisa, faCcMastercard, faInstagram, faFacebook, faLinkedin } from '@fortawesome/free-brands-svg-icons';
-import { faShieldHalved, faLock, faEnvelope, faPhone, faClock, faBarcode } from '@fortawesome/free-solid-svg-icons';
+import { faShieldHalved, faLock, faEnvelope, faPhone, faClock } from '@fortawesome/free-solid-svg-icons';
 import useScrollToTop from "../../hooks/useScrollToTop";
 
 const Footer = () => {
@@ -11,7 +11,6 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-container">
         
-        {/* BRAND SECTION */}
         <div className="footer-brand">
           <h2 className="logo-text">Tech<span>Store</span></h2>
           <p className="footer-description">Tecnologia de ponta para quem busca performance e inovação.</p>
@@ -22,7 +21,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* CONTATO */}
         <div className="footer-section">
           <h3>Atendimento</h3>
           <ul className="footer-list">
@@ -32,16 +30,11 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* PAGAMENTO (ÍCONES FONT AWESOME) */}
         <div className="footer-section">
           <h3>Pagamento</h3>
           <div className="payment-methods">
             <FontAwesomeIcon icon={faCcVisa} size="2x" aria-label="Visa" />
             <FontAwesomeIcon icon={faCcMastercard} size="2x" aria-label="Mastercard" />
-            <FontAwesomeIcon icon={faBarcode} size="2x" aria-label="Boleto" />
-            <div className="pix-badge" aria-label="Pix">
-              PIX
-            </div>
           </div>
         </div>
 

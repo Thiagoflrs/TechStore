@@ -11,7 +11,7 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 function Header() {
   const { user, logout } = useAuth();
-  const { cartCount } = useCart();
+  const { cartCount, setUserId } = useCart();
   const navigate = useNavigate();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -27,10 +27,12 @@ function Header() {
   const handleLogout = async () => {
     try {
       const mensagem = await logout();
+      setUserId(null)
+
       await Swal.fire({
         icon: 'success',
         title: 'Sucesso!',
-        text: mensagem,        
+        text: mensagem || "Logou realizado com sucesso|",        
         timer: 1500,
         timerProgressBar: true,
         showConfirmButton: false,

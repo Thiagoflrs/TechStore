@@ -1,30 +1,69 @@
 import { useState } from "react";
-import { login as loginService, logoutService } from "../services/authService";
 
-export function useAuth() {
+export const useAuth = () => {
   const [user, setUser] = useState(() => {
-  const token = localStorage.getItem("token");
-  if (!token) return null;
-  return {
-    nome: localStorage.getItem("nome"),
-    saldo: parseFloat(localStorage.getItem("saldo")) || 0,
-    token,
-  };
-});
+    const nome = localStorage.getItem("nome");
+    const saldo = localStorage.getItem("saldo");
+    const token = localStorage.getItem("token");
+    const usuarioId = localStorage.getItem("usuarioId");
 
-  const login = async (email, senha) => {
-    const { token, nome, saldo } = await loginService(email, senha);
+    if (token && token !== "undefined") {
+      return { 
+        nome: nome || "Usuário", 
+        saldo: parseFloat(saldo || 0), 
+        token,
+        usuarioId
+      };
+    }
+    return null;
+  });
+
+  const login = (userData) => {
+    const token = userData.Token;
+    const nome = userData.Nome;
+    const saldo = userData.Saldo ?? 0;
+    const usuarioId = userData.UsuarioId;
+
     localStorage.setItem("token", token);
     localStorage.setItem("nome", nome);
-    localStorage.setItem("saldo", saldo ?? 0);
-    setUser({ token, nome, saldo: saldo ?? 0 });
+    localStorage.setItem("saldo", saldo.toString());
+
+    if (usuarioId) {
+      localStorage.setItem("usuarioId", usuarioId);
+    }
+    
+    setUser({
+      token: token,
+      nome: nome,
+      saldo: parseFloat(saldo),
+      usuarioId: usuarioId,
+    });
   };
 
-  const logout = async () => {
-    const mensagem = await logoutService();
+  const logout = () => {
+    localStorage.clear();
     setUser(null);
-    return mensagem;
+    window.location.href = "/";
   };
 
-  return { user, login, logout };
-}
+  const atualizarSaldo = (novoSaldo) => {
+    const saldoFormatado = parseFloat(novoSaldo || 0);
+    localStorage.setItem("saldo", saldoFormatado.toString());
+    
+    setUser((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        saldo: saldoFormatado,
+      };
+    });
+  };
+
+  return {
+    user,
+    isLoggedIn: !!user,
+    login,
+    logout,
+    atualizarSaldo,
+  };
+};

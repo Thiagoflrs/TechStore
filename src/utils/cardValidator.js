@@ -1,6 +1,3 @@
-/**
- * Implementação do Algoritmo de Luhn para validar o dígito verificador.
- */
 export function luhnAlgorithm(cardNumber) {
   const digits = cardNumber.split("").map(Number);
   let sum = 0;
@@ -21,13 +18,9 @@ export function luhnAlgorithm(cardNumber) {
   return sum % 10 === 0;
 }
 
-/**
- * Detecta a bandeira conforme o usuário digita (feedback visual imediato).
- */
 export function detectarBandeiraParcial(numero) {
   if (!numero) return null;
 
-  // Regex para Elo (faixas comuns de BINs brasileiros)
   const eloRegex = /^(40117[8-9]|431274|438935|451416|457393|457631|504175|506699|5067|5090|627780|636297|636368|650031|6504|6505|6507|6509|6516|6550)/;
   
   if (eloRegex.test(numero)) return "Elo";
@@ -39,12 +32,8 @@ export function detectarBandeiraParcial(numero) {
   return null;
 }
 
-/**
- * Validação rigorosa do padrão da bandeira após o número estar completo.
- */
 export function getCardIssuer(cardNumber) {
   const cardPatterns = {
-    // Padrão Elo completo para cartões de 16 dígitos
     Elo: /^(40117[8-9]|431274|438935|451416|457393|457631|504175|506699|5067[0-7][0-9]|5090[0-8][0-9]|627780|636297|636368|65003[1-3]|6504[0-3][0-9]|6505[0-9][0-9]|6507[0-9][0-9]|6509[0-1][0-9]|6516[5-7][0-9]|6550[0-1][0-9])[0-9]{10,12}$/,
     Visa: /^4[0-9]{12}(?:[0-9]{3})?$/,
     MasterCard: /^5[1-5][0-9]{14}$/,
@@ -59,14 +48,10 @@ export function getCardIssuer(cardNumber) {
   return "Unknown";
 }
 
-/**
- * Função principal que orquestra a validação do cartão.
- */
 export function validateCreditCard(cardNumber) {
   const numeroLimpo = cardNumber.replace(/\D/g, "");
   const bandeiraParcial = detectarBandeiraParcial(numeroLimpo);
 
-  // Se for muito curto, detectamos apenas a bandeira parcial
   if (numeroLimpo.length < 13) {
     return {
       valid: false,
@@ -77,16 +62,12 @@ export function validateCreditCard(cardNumber) {
   const isLuhnValid = luhnAlgorithm(numeroLimpo);
   const bandeiraFinal = getCardIssuer(numeroLimpo);
 
-  // Consideramos válido se passar no Luhn e possuir um padrão de bandeira reconhecido
   return {
     valid: isLuhnValid && bandeiraFinal !== "Unknown",
     bandeira: bandeiraFinal !== "Unknown" ? bandeiraFinal : bandeiraParcial,
   };
 }
 
-/**
- * Valida se a data de expiração (MM/AA) é futura e válida.
- */
 export function validateExpiryDate(validade) {
   if (!validade || validade.length !== 5) {
     return { valid: false, message: "Data incompleta" };
@@ -99,7 +80,7 @@ export function validateExpiryDate(validade) {
   }
 
   const agora = new Date();
-  const anoAtual = agora.getFullYear() % 100; // Ex: 2026 -> 26
+  const anoAtual = agora.getFullYear() % 100; 
   const mesAtual = agora.getMonth() + 1;
 
   if (anoStr < anoAtual || (anoStr === anoAtual && mes < mesAtual)) {

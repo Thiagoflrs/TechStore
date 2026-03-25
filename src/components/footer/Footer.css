@@ -81,14 +81,6 @@
   color: #cbd5e1;
 }
 
-.pix-badge {
-  border: 1px solid #cbd5e1;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 0.7rem;
-}
-
 .security-badges {
   display: flex;
   flex-direction: column;
@@ -133,7 +125,7 @@
   border: none;
   display: none;
   cursor: pointer;
-  transition: transform 0.1s ease,
+  transition: transform 0.1s ease;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 

@@ -67,24 +67,28 @@ function Category() {
         </div>
 
         {loading ? (
-          <p>Carregando produtos...</p>
+          <div className="cat-empty">
+            <p>Carregando produtos...</p>
+          </div>
         ) : (
           <>
             <div className="cat-grid">
               {products.map((item) => (
-                <div key={item.id} className="cat-card">
+                <div key={item.id} className="cat-card" onClick={() => navigate(`/product/${item.id}`)}>
                   <div className="cat-img-box">
                     <img src={item.image} alt={item.name} />
                   </div>
 
                   <div className="cat-txt-box">
                     <h3 title={item.name}>{item.name}</h3>
-
                     <p className="cat-price">{formatPrice(item.price)}</p>
-
+                    
                     <button
                       className="cat-buy-btn"
-                      onClick={() => navigate(`/product/${item.id}`)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/product/${item.id}`);
+                      }}
                     >
                       <ShoppingBasket size={18} />
                       Comprar
@@ -96,7 +100,7 @@ function Category() {
 
             {products.length === 0 && (
               <div className="cat-empty">
-                <p>Nenhum produto encontrado.</p>
+                <p>Nenhum produto encontrado nesta categoria.</p>
               </div>
             )}
           </>

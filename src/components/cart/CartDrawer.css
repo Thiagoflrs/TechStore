@@ -9,7 +9,7 @@
 }
 
 .drawer-content {
-  width: 380px;
+  width: 480px;
   height: 100%;
   background: #0a0a0a;
   border-left: 2px solid var(--secondary);
@@ -64,6 +64,74 @@
   border-radius: 8px;
   object-fit: cover;
   border: 1px solid #333;
+}
+
+.item-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 75px;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.remove-btn:hover {
+  color: #ff4d4d;
+  transform: scale(1.1);
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #111;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.quantity-control button {
+  background: var(--secondary);
+  border: none;
+  color: #000;
+  font-weight: bold;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.quantity-control button:hover {
+  opacity: 0.8;
+}
+
+.quantity-control span {
+  color: #fff;
+  min-width: 20px;
+  text-align: center;
+}
+
+.quantity-control button:disabled {
+  background: #333;
+  color: #777;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.quantity-control button:disabled:hover {
+  transform: none;
+  opacity: 0.6;
+}
+
+.item-details {
+  flex: 1;
 }
 
 .item-details h4 {

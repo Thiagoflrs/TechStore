@@ -4,6 +4,7 @@ const API_URL = "http://localhost:5248/api/Produtos"
 export const mapProduto = (produto) => {
   return {
     id: produto.ProdutoId,
+    codigo: produto.Codigo,
     name: produto.Nome,
     price: produto.Valor ?? 0,
     oldPrice: null,

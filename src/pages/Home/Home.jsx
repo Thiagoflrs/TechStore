@@ -20,13 +20,13 @@ function Home() {
       <Categories title="Confira nossas Categorias" />
       <ProductSection title="Consoles" categoriasIds={[8]} /> {/**consoles */}
       <SectionDivider images={[Banner0]} />
-      <ProductSection title="Periféricos" categoriasIds={[5, 6, 7, 4]} />{" "}
+      <ProductSection title="Periféricos" categoriasIds={[5, 6, 7, 4]} />
       {/** mouse, teclados, monitores, fone */}
       <SectionDivider images={[Banner1, Banner2]} />
-      <ProductSection title="Smartphones" categoriasIds={[1]} />{" "}
+      <ProductSection title="Smartphones" categoriasIds={[1]} />
       {/** celular */}
       <SectionDivider images={[Banner3, Banner4, Banner5]} />
-      <ProductSection title="Acessórios" categoriasIds={[2, 9]} />{" "}
+      <ProductSection title="Acessórios" categoriasIds={[2, 9]} />
       {/** acessorios, cabos */}
       <RecommendedBrands title="Marcas Recomendadas" />
       <Footer />

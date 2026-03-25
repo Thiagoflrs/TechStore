@@ -6,14 +6,13 @@ export function useProtectedAction() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleAction = (callback) => {
+  const handleAction = (callback, redirectTo) => {
     if (!user) {
       navigate("/auth", {
-        state: { from: location.pathname },
+        state: { from: redirectTo || location.pathname },
       });
       return;
     }
-
     callback();
   };
 

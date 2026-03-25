@@ -4,11 +4,11 @@ const images = import.meta.glob("/src/assets/images/produtos/*", {
 
 import defaultImage from "../assets/images/produtos/default.jpg";
 
-export const getImageById = (id) => {
+export const getImageById = (productId) => {
   const extensions = ["webp", "jpg", "png"];
 
   for (let ext of extensions) {
-    const path = `/src/assets/images/produtos/${id}.${ext}`;
+    const path = `/src/assets/images/produtos/${productId}.${ext}`;
     const image = images[path]
 
     if (image) {

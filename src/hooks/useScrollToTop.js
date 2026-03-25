@@ -11,7 +11,6 @@ const useScrollToTop = () => {
       ) {
         myButton.style.display = "block";
       } else {
-        // Se não, esconder o botão
         myButton.style.display = "none";
       }
     };

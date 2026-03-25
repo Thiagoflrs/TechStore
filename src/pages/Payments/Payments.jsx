@@ -1,67 +1,170 @@
 import { useState, useEffect } from "react";
 import "./Payments.css";
-import { validateCreditCard, validateExpiryDate } from "../../utils/cardValidator";
+import {
+  validateCreditCard,
+  validateExpiryDate,
+} from "../../utils/cardValidator";
 import VisualCard from "./VisualCard";
 import Header from "../../components/header/Header";
 import Footer from "../../components/footer/Footer";
-import { useCart } from "../../context/CartContext";
 import { useNavigate } from "react-router-dom";
-import { QrCode, CreditCard, ClipboardList } from "lucide-react";
+import {
+  CreditCard,
+  QrCode,
+  CreditCard as DebitIcon,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import Swal from "sweetalert2";
+import { concluirPedido } from "../../services/orderService";
+import { useCart } from "../../context/CartContext";
 
 function Pagamento() {
-  const { cart } = useCart();
   const navigate = useNavigate();
-  const [metodoAtivo, setMetodoAtivo] = useState('credito'); 
+  const { clearCart } = useCart();
+
+  const [pedido, setPedido] = useState(null);
+  const [metodoAtivo, setMetodoAtivo] = useState("credito");
   const [analise, setAnalise] = useState(false);
-  const [tempoPix, setTempoPix] = useState(300);
   const [virado, setVirado] = useState(false);
-  const [dadosCard, setDadosCard] = useState({ numero: "", nome: "", validade: "", cvv: "", bandeira: null });
-  const [validacao, setValidacao] = useState({ cartao: null, data: null });
+  const [parcelas, setParcelas] = useState(1);
 
-  const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const [dadosCard, setDadosCard] = useState({
+    numero: "",
+    nome: "",
+    validade: "",
+    cvv: "",
+    bandeira: null,
+  });
 
-  const toggleMetodo = (metodo) => {
-    setMetodoAtivo(metodoAtivo === metodo ? null : metodo);
-  };
+  const [validacao, setValidacao] = useState({
+    cartao: null,
+    data: { valid: null },
+  });
 
   useEffect(() => {
-    let timer;
-    if (metodoAtivo === "pix" && tempoPix > 0) {
-      timer = setInterval(() => setTempoPix((t) => t - 1), 1000);
+    const pedidoId = localStorage.getItem("pedidoId");
+    const itens = localStorage.getItem("pedidoItens");
+
+    if (!pedidoId || !itens) {
+      navigate("/");
+      return;
     }
-    return () => clearInterval(timer);
-  }, [metodoAtivo, tempoPix]);
+
+    setPedido({ id: pedidoId, itens: JSON.parse(itens) });
+  }, [navigate]);
+
+  const formatCardNumber = (value) =>
+    value
+      .replace(/\D/g, "")
+      .slice(0, 16)
+      .replace(/(\d{4})(?=\d)/g, "$1 ");
 
   const handleChangeCard = (e) => {
     let { name, value } = e.target;
     if (name === "numero") {
-      value = value.replace(/\D/g, "").slice(0, 16);
-      const res = validateCreditCard(value);
+      const clean = value.replace(/\D/g, "");
+      const res = validateCreditCard(clean);
       setValidacao((prev) => ({ ...prev, cartao: res }));
-      setDadosCard((prev) => ({ ...prev, numero: value, bandeira: res?.bandeira }));
+      setDadosCard((prev) => ({
+        ...prev,
+        numero: formatCardNumber(value),
+        bandeira: res?.bandeira || null,
+      }));
     } else if (name === "validade") {
-      value = value.replace(/\D/g, "").replace(/(\d{2})(\d)/, "$1/$2").slice(0, 5);
-      setDadosCard((prev) => ({ ...prev, [name]: value }));
+      value = value
+        .replace(/\D/g, "")
+        .replace(/(\d{2})(\d)/, "$1/$2")
+        .slice(0, 5);
+      setDadosCard((prev) => ({ ...prev, validade: value }));
       if (value.length === 5) {
         setValidacao((prev) => ({ ...prev, data: validateExpiryDate(value) }));
       }
     } else if (name === "nome") {
-      setDadosCard((prev) => ({ ...prev, [name]: value.toUpperCase() }));
-    } else {
-      setDadosCard((prev) => ({ ...prev, [name]: value }));
+      setDadosCard((prev) => ({ ...prev, nome: value.toUpperCase() }));
+    } else if (name === "cvv") {
+      setDadosCard((prev) => ({
+        ...prev,
+        cvv: value.replace(/\D/g, "").slice(0, 4),
+      }));
     }
   };
 
-  if (analise) {
+  const total =
+    pedido?.itens?.reduce((acc, item) => acc + item.price * item.quantity, 0) ??
+    0;
+
+  const isCardValid =
+    validacao.cartao?.valid &&
+    validacao.data?.valid &&
+    (dadosCard.cvv.length === 3 || dadosCard.cvv.length === 4) &&
+    dadosCard.nome.length > 3;
+  const finalizarPagamento = async () => {
+    try {
+      setAnalise(true);
+      const tipoParaAPI = metodoAtivo.toUpperCase();
+
+      // Envia para o Back-end (C#) processar o pedido/e-mail
+      await concluirPedido(pedido.id, tipoParaAPI);
+
+      // Se for Pix, mostramos o QR Code estático antes de limpar tudo
+      if (tipoParaAPI === "PIX") {
+        setAnalise(false); // Para o loading para mostrar o Modal
+        await Swal.fire({
+          title: "Pagamento via Pix",
+          html: `
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+              <p>Escaneie o QR Code abaixo para pagar:</p>
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=ChavePixSimuladaTechStore" alt="QR Code Pix" style="border: 5px solid #fff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" />
+              <div style="background: #f1f5f9; padding: 10px; border-radius: 5px; width: 100%;">
+                <small style="color: #64748b; font-weight: bold;">Código Copia e Cola:</small>
+                <p style="font-size: 12px; word-break: break-all; margin: 5px 0;">00020126360014BR.GOV.BCB.PIX0114TECHSTORE20265204000053039865802BR5913TECHSTORE6009SAO_PAULO62070503***6304E2B1</p>
+              </div>
+            </div>
+          `,
+          confirmButtonText: "JÁ PAGUEI",
+          confirmButtonColor: "#007bff",
+          allowOutsideClick: false,
+        });
+      } else {
+        // Se for cartão (Crédito/Débito), apenas o alerta de sucesso normal
+        await Swal.fire({
+          icon: "success",
+          title: "Pagamento aprovado!",
+          text: "Seu pedido foi concluído com sucesso.",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+      }
+
+      // Limpeza final e Redirecionamento
+      localStorage.removeItem("pedidoId");
+      localStorage.removeItem("pedidoItens");
+      clearCart();
+      navigate("/");
+    } catch (error) {
+      setAnalise(false);
+      Swal.fire({
+        icon: "error",
+        title: "Erro no pagamento",
+        text:
+          error.response?.data?.Mensagem ||
+          "Não foi possível concluir o pedido.",
+      });
+    }
+  };
+
+  if (!pedido) return <p style={{ padding: "40px" }}>Carregando...</p>;
+
+  if (analise)
     return (
       <div className="container-analise">
         <div className="card-analise">
-          <h1>Pagamento em análise</h1>
+          <h1>Processando pagamento...</h1>
           <div className="spinner"></div>
         </div>
       </div>
     );
-  }
 
   return (
     <>
@@ -69,87 +172,276 @@ function Pagamento() {
       <div className="kb-container-master">
         <div className="kb-grid-layout">
           <section className="kb-section-pagamento">
-            <h2 className="kb-title-step">FORMA DE PAGAMENTO</h2>
+            <h2 className="kb-title-step">Escolha como pagar</h2>
+
             <div className="kb-accordion">
-              <div className={`kb-accordion-item ${metodoAtivo === 'pix' ? 'open' : ''}`}>
-                <button className="kb-accordion-header" onClick={() => toggleMetodo('pix')}>
-                  <div className="kb-header-left">
-                    <span className="kb-radio-simulado"></span>
-                    <strong className="kb-metodo-nome">PIX</strong>
+              {/* PIX */}
+              <div
+                className={`kb-accordion-item ${metodoAtivo === "pix" ? "open" : ""}`}
+              >
+                <button
+                  className="kb-accordion-header"
+                  onClick={() => setMetodoAtivo("pix")}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <QrCode
+                      size={20}
+                      color={metodoAtivo === "pix" ? "#007bff" : "#64748b"}
+                    />
+                    <strong>Pix</strong>
                   </div>
-                  <QrCode size={24} color={metodoAtivo === 'pix' ? "#007bff" : "#718096"} />
+                  {metodoAtivo === "pix" ? (
+                    <ChevronUp size={20} />
+                  ) : (
+                    <ChevronDown size={20} />
+                  )}
                 </button>
-                <div className="kb-accordion-content">
-                  <div className="kb-content-inner">
-                    <div className="kb-pix-data">
-                      <div className="kb-qr-wrapper">
-                        <img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=Pix_${total}`} alt="Pix" />
-                      </div>
-                      <div className="kb-pix-text">
-                        <p>Total PIX:</p>
-                        <h3>{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h3>
-                        <p>Expira em: <strong>{Math.floor(tempoPix / 60)}:{String(tempoPix % 60).padStart(2, "0")}</strong></p>
-                      </div>
-                    </div>
+                {metodoAtivo === "pix" && (
+                  <div className="kb-accordion-content fade-in">
+                    <p>
+                      O QR Code para pagamento será gerado após a finalização.
+                    </p>
                   </div>
-                </div>
+                )}
               </div>
 
-              <div className={`kb-accordion-item ${metodoAtivo === 'credito' ? 'open' : ''}`}>
-                <button className="kb-accordion-header" onClick={() => toggleMetodo('credito')}>
-                  <div className="kb-header-left">
-                    <span className="kb-radio-simulado"></span>
-                    <strong className="kb-metodo-nome">CARTÃO DE CRÉDITO</strong>
+              {/* CRÉDITO */}
+              <div
+                className={`kb-accordion-item ${metodoAtivo === "credito" ? "open" : ""}`}
+              >
+                <button
+                  className="kb-accordion-header"
+                  onClick={() => setMetodoAtivo("credito")}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <CreditCard
+                      size={20}
+                      color={metodoAtivo === "credito" ? "#007bff" : "#64748b"}
+                    />
+                    <strong>Cartão de Crédito</strong>
                   </div>
-                  <CreditCard size={24} color={metodoAtivo === 'credito' ? "#007bff" : "#718096"} />
+                  {metodoAtivo === "credito" ? (
+                    <ChevronUp size={20} />
+                  ) : (
+                    <ChevronDown size={20} />
+                  )}
                 </button>
-                <div className="kb-accordion-content">
-                  <div className="kb-content-inner kb-credito-inner">
+                {metodoAtivo === "credito" && (
+                  <div className="kb-accordion-content fade-in">
                     <div className="kb-visual-card-center">
                       <VisualCard
-                        numero={dadosCard.numero}
-                        nome={dadosCard.nome}
-                        validade={dadosCard.validade}
-                        cvv={dadosCard.cvv}
-                        bandeira={dadosCard.bandeira}
+                        {...dadosCard}
                         virado={virado}
                         validacao={validacao}
                       />
                     </div>
                     <div className="kb-credito-form">
-                      <input name="numero" type="text" placeholder="Número do cartão*" value={dadosCard.numero} onChange={handleChangeCard} />
-                      <input name="nome" type="text" placeholder="Nome impresso no cartão*" value={dadosCard.nome} onChange={handleChangeCard} />
+                      <input
+                        type="text"
+                        name="numero"
+                        placeholder="0000 0000 0000 0000"
+                        value={dadosCard.numero}
+                        onChange={handleChangeCard}
+                        className={
+                          validacao.cartao?.valid
+                            ? "valid"
+                            : dadosCard.numero.length > 15
+                              ? "invalid"
+                              : ""
+                        }
+                      />
+                      <input
+                        type="text"
+                        name="nome"
+                        placeholder="NOME IMPRESSO NO CARTÃO"
+                        value={dadosCard.nome}
+                        onChange={handleChangeCard}
+                      />
                       <div className="kb-form-row">
-                        <input name="validade" type="text" placeholder="Validade*" value={dadosCard.validade} onChange={handleChangeCard} maxLength={5} />
-                        <input 
-                          name="cvv" 
-                          type="text" 
-                          placeholder="CVV*" 
-                          maxLength={4} 
-                          value={dadosCard.cvv} 
-                          onFocus={() => setVirado(true)} 
-                          onBlur={() => setVirado(false)} 
-                          onChange={(e) => setDadosCard({ ...dadosCard, cvv: e.target.value.replace(/\D/g, "") })} 
+                        <input
+                          type="text"
+                          name="validade"
+                          placeholder="MM/AA"
+                          value={dadosCard.validade}
+                          onChange={handleChangeCard}
+                          className={
+                            validacao.data?.valid
+                              ? "valid"
+                              : dadosCard.validade.length === 5
+                                ? "invalid"
+                                : ""
+                          }
+                        />
+                        <input
+                          type="text"
+                          name="cvv"
+                          placeholder="CVV"
+                          value={dadosCard.cvv}
+                          onChange={handleChangeCard}
+                          onFocus={() => setVirado(true)}
+                          onBlur={() => setVirado(false)}
+                        />
+                      </div>
+                      <select
+                        value={parcelas}
+                        onChange={(e) => setParcelas(Number(e.target.value))}
+                      >
+                        {[1, 2, 3, 6, 7, 8, 9, 10, 11, 12].map((p) => (
+                          <option key={p} value={p}>
+                            {p}x de{" "}
+                            {(total / p).toLocaleString("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                            })}{" "}
+                            sem juros
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* DÉBITO */}
+              <div
+                className={`kb-accordion-item ${metodoAtivo === "debito" ? "open" : ""}`}
+              >
+                <button
+                  className="kb-accordion-header"
+                  onClick={() => setMetodoAtivo("debito")}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <DebitIcon
+                      size={20}
+                      color={metodoAtivo === "debito" ? "#007bff" : "#64748b"}
+                    />
+                    <strong>Cartão de Débito</strong>
+                  </div>
+                  {metodoAtivo === "debito" ? (
+                    <ChevronUp size={20} />
+                  ) : (
+                    <ChevronDown size={20} />
+                  )}
+                </button>
+                {metodoAtivo === "debito" && (
+                  <div className="kb-accordion-content fade-in">
+                    <div className="kb-visual-card-center">
+                      <VisualCard
+                        {...dadosCard}
+                        virado={virado}
+                        validacao={validacao}
+                      />
+                    </div>
+                    <div className="kb-credito-form">
+                      <input
+                        type="text"
+                        name="numero"
+                        placeholder="0000 0000 0000 0000"
+                        value={dadosCard.numero}
+                        onChange={handleChangeCard}
+                      />
+                      <input
+                        type="text"
+                        name="nome"
+                        placeholder="NOME IMPRESSO NO CARTÃO"
+                        value={dadosCard.nome}
+                        onChange={handleChangeCard}
+                      />
+                      <div className="kb-form-row">
+                        <input
+                          type="text"
+                          name="validade"
+                          placeholder="MM/AA"
+                          value={dadosCard.validade}
+                          onChange={handleChangeCard}
+                        />
+                        <input
+                          type="text"
+                          name="cvv"
+                          placeholder="CVV"
+                          value={dadosCard.cvv}
+                          onChange={handleChangeCard}
+                          onFocus={() => setVirado(true)}
+                          onBlur={() => setVirado(false)}
                         />
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </section>
 
           <aside className="kb-aside-resumo">
             <div className="kb-white-card">
-              <h3 className="resumo-titulo"><ClipboardList size={20} color="#007bff" /> Resumo do pedido</h3>
+              <h3 style={{ marginBottom: "15px", fontWeight: "700" }}>
+                Resumo do Pedido
+              </h3>
+              {pedido.itens.map((item, idx) => (
+                <div className="kb-line" key={idx}>
+                  <span>
+                    {item.quantity}x {item.name}
+                  </span>
+                  <span>
+                    {(item.price * item.quantity).toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
+                  </span>
+                </div>
+              ))}
+              <hr
+                style={{
+                  border: "none",
+                  borderTop: "1px solid var(--kb-border)",
+                  margin: "10px 0",
+                }}
+              />
               <div className="kb-total-block">
                 <span>Total:</span>
-                <strong className="kb-price-blue">{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
+                <strong className="green-text">
+                  {total.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </strong>
               </div>
-            </div>
-            <div className="kb-action-buttons">
-              <button className="kb-btn-primary" onClick={() => setAnalise(true)}>FINALIZAR COMPRA</button>
-              <button className="kb-btn-secondary" onClick={() => navigate(-1)}>VOLTAR</button>
+
+              <div className="kb-action-buttons">
+                <button
+                  className="kb-btn-primary"
+                  onClick={finalizarPagamento}
+                  disabled={
+                    (metodoAtivo !== "pix" && !isCardValid) || !metodoAtivo
+                  }
+                >
+                  {analise ? "PROCESSANDO..." : "FINALIZAR COMPRA"}
+                </button>
+                <button
+                  className="kb-btn-secondary"
+                  onClick={() => navigate(-1)}
+                >
+                  VOLTAR
+                </button>
+              </div>
             </div>
           </aside>
         </div>

@@ -2,7 +2,10 @@ import { motion } from "framer-motion";
 import { useForm } from "../../../hooks/useForm";
 import { validateRegister } from "../../../validators/authValidator";
 import { useAge } from "../../../hooks/useAge";
-import { register as registerService } from "../../../services/authService";
+import { 
+  register as registerService, 
+  login as loginService 
+} from "../../../services/authService";
 import { useAuth } from "../../../hooks/useAuth";
 import Swal from "sweetalert2";
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -28,15 +31,17 @@ function RegisterForm() {
 
     try {
       await registerService(data);
-      await login(data.email, data.password);
+
+      const userData = await loginService(data.email, data.password);
+
+      login(userData); 
 
       await Swal.fire({
         icon: 'success',
         title: 'Conta criada!',
         text: `Bem-vindo(a), ${data.name}! Agora você está logado.`,
-        confirmButtonText: 'Tela principal',
-        timer: 2500,
-        timerProgressBar: true,
+        timer: 2000,
+        showConfirmButton: false,
       });
 
       window.location.href = "/";
@@ -64,7 +69,6 @@ function RegisterForm() {
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
     >
-      {/* Nome */}
       <motion.div variants={shakeVariant} animate={errors.name ? "error" : "visible"}>
         <input
           type="text"
@@ -77,7 +81,6 @@ function RegisterForm() {
         {errors.name && <p className="error">{errors.name}</p>}
       </motion.div>
 
-      {/* Email */}
       <motion.div variants={shakeVariant} animate={errors.email ? "error" : "visible"}>
         <input
           type="email"
@@ -90,7 +93,6 @@ function RegisterForm() {
         {errors.email && <p className="error">{errors.email}</p>}
       </motion.div>
 
-      {/* Data de Nascimento */}
       <motion.div variants={shakeVariant} animate={errors.birthDate ? "error" : "visible"}>
         <input
           type="date"
@@ -113,7 +115,6 @@ function RegisterForm() {
         )}
       </motion.div>
 
-      {/* Gênero */}
       <motion.div variants={shakeVariant} animate={errors.gender ? "error" : "visible"}>
         <select
           name="gender"
@@ -131,7 +132,6 @@ function RegisterForm() {
         {errors.gender && <p className="error">{errors.gender}</p>}
       </motion.div>
 
-      {/* Senha */}
       <motion.div variants={shakeVariant} animate={errors.password ? "error" : "visible"}>
         <input
           type="password"
@@ -144,7 +144,6 @@ function RegisterForm() {
         {errors.password && <p className="error">{errors.password}</p>}
       </motion.div>
 
-      {/* Confirmar Senha */}
       <motion.div variants={shakeVariant} animate={errors.confirmPassword ? "error" : "visible"}>
         <input
           type="password"
@@ -157,7 +156,6 @@ function RegisterForm() {
         {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
       </motion.div>
 
-      {/* Botão */}
       <motion.button
         type="submit"
         disabled={errors && Object.keys(errors).length > 0}

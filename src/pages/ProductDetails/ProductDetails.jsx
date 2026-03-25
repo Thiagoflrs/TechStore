@@ -7,15 +7,16 @@ import Header from "../../components/header/Header";
 import Footer from "../../components/footer/Footer";
 import RecommendedBrands from "../../components/BrandCard/RecommendedBrands";
 import { getProdutoById } from "../../services/productService";
+import { createOrder } from "../../services/orderService";
 import { paths } from "../../routes/paths";
 import { useCart } from "../../context/CartContext";
 import FlyToCart from "../../components/cart/FlyToCart";
+import Swal from "sweetalert2";
 
 export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
-
+  const { cart, addToCart } = useCart();
   const { handleAction } = useProtectedAction();
 
   const [product, setProduct] = useState(null);
@@ -31,8 +32,7 @@ export default function ProductDetails() {
         const data = await getProdutoById(Number(id));
         const productWithExtras = {
           ...data,
-          description:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatu",
+          description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
           brand: "TechStore",
           stock: data.stock ?? 0,
         };
@@ -51,8 +51,7 @@ export default function ProductDetails() {
 
   const handleMouseMove = (e) => {
     if (!showZoom) return;
-    const { left, top, width, height } =
-      e.currentTarget.getBoundingClientRect();
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - left) / width) * 100;
     const y = ((e.clientY - top) / height) * 100;
     setZoomStyle({ backgroundPosition: `${x}% ${y}%` });
@@ -67,17 +66,59 @@ export default function ProductDetails() {
   };
 
   const handleBuyNow = () => {
-    handleAction(() => {
+    handleAction(async () => {
       if (product && product.stock > 0) {
-        addToCart(product);
-        navigate(paths.public.payments);
+        try {
+          const carrinhoAtualizado = [...cart];
+          const indexExistente = carrinhoAtualizado.findIndex(item => item.codigo === product.codigo);
+
+          if (indexExistente > -1) {
+            carrinhoAtualizado[indexExistente].quantity += 1;
+          } else {
+            carrinhoAtualizado.push({ ...product, quantity: 1 });
+          }
+
+          const payload = {
+            Itens: carrinhoAtualizado.map(item => ({
+              CodigoProduto: item.codigo,
+              Quantidade: item.quantity,
+            })),
+          };
+
+          const response = await createOrder(payload);
+          const pedidoId = response?.pedidoId || response?.id || response?.PedidoId;
+
+          if (!pedidoId) throw new Error("ID do pedido não retornado.");
+
+          localStorage.setItem("pedidoId", pedidoId);
+          localStorage.setItem("pedidoItens", JSON.stringify(carrinhoAtualizado));
+
+          addToCart(product);
+
+          await Swal.fire({
+            icon: "success",
+            title: "Pedido gerado!",
+            text: "Redirecionando para o pagamento...",
+            timer: 1500,
+            showConfirmButton: false,
+          });
+
+          navigate(paths.public.payments);
+
+        } catch (error) {
+          console.error("Erro ao criar pedido expresso:", error);
+          Swal.fire({
+            icon: "error",
+            title: "Ops...",
+            text: error.response?.data?.Mensagem || "Não foi possível gerar seu pedido.",
+          });
+        }
       }
-    });
+    }, paths.public.payments);
   };
 
   if (loading) return <p style={{ padding: "40px" }}>Carregando...</p>;
-  if (!product)
-    return <p style={{ padding: "40px" }}>Produto não encontrado</p>;
+  if (!product) return <p style={{ padding: "40px" }}>Produto não encontrado</p>;
 
   const pixPrice = product.price * 0.9;
   const isOutOfStock = product.stock === 0;
@@ -87,69 +128,32 @@ export default function ProductDetails() {
       <Header />
       <FlyToCart isAnimating={isFlying} productImage={product.image} />
       <div className="details-container">
-        <Link to="/" className="cat-back">
-          <ArrowLeft size={16} /> Voltar
-        </Link>
+        <Link to="/" className="cat-back"><ArrowLeft size={16} /> Voltar</Link>
         <div className="details-wrapper">
-          <div
-            className="image-section"
-            onMouseMove={handleMouseMove}
-            onMouseEnter={() => setShowZoom(true)}
-            onMouseLeave={() => {
-              setShowZoom(false);
-              setIsDragging(false);
-            }}
-            onMouseDown={() => setIsDragging(true)}
-            onMouseUp={() => setIsDragging(false)}
-          >
+          <div className="image-section" onMouseMove={handleMouseMove} onMouseEnter={() => setShowZoom(true)} onMouseLeave={() => setShowZoom(false)}>
             <img src={product.image} alt={product.name} />
             {showZoom && (
-              <div
-                className="zoom-lens"
-                style={{
-                  backgroundImage: `url(${product.image})`,
-                  ...zoomStyle,
-                  cursor: isDragging ? "grabbing" : "zoom-in",
-                }}
-              />
+              <div className="zoom-lens" style={{ backgroundImage: `url(${product.image})`, ...zoomStyle }} />
             )}
           </div>
           <div className="info">
             <h1>{product.name}</h1>
-            <span className="brand">
-              Marca: <strong>{product.brand}</strong>
-            </span>
+            <span className="brand">Marca: <strong>{product.brand}</strong></span>
             <p className="description">{product.description}</p>
             <div className="price-boxDetails">
               <h2 className="price-details">{formatPrice(product.price)}</h2>
-              <span className="pix">
-                ou {formatPrice(pixPrice)} no PIX (10% OFF)
-              </span>
+              <span className="pix">ou {formatPrice(pixPrice)} no PIX (10% OFF)</span>
             </div>
             <p className={`stock ${product.stock > 0 ? "ok" : "out"}`}>
-              {product.stock > 0
-                ? `✔ Em estoque (${product.stock} unidades)`
-                : "✖ Indisponível"}
+              {product.stock > 0 ? `✔ Em estoque (${product.stock} unidades)` : "✖ Indisponível"}
             </p>
             <div className="buy-box">
-              <button
-                className={`buy-btn ${isOutOfStock ? "disabled" : ""}`}
-                disabled={isOutOfStock}
-                onClick={handleBuyNow}
-              >
+              <button className={`buy-btn ${isOutOfStock ? "disabled" : ""}`} disabled={isOutOfStock} onClick={handleBuyNow}>
                 {isOutOfStock ? "Indisponível" : "Comprar agora"}
               </button>
-              <button
-                className="cart-btn"
-                disabled={isOutOfStock}
-                onClick={handleAddToCart}
-              >
+              <button className="cart-btn" disabled={isOutOfStock} onClick={handleAddToCart}>
                 Adicionar ao carrinho
               </button>
-            </div>
-            <div className="benefits">
-              <div>🚚 Frete rápido</div>
-              <div>🔒 Compra segura</div>
             </div>
           </div>
         </div>
