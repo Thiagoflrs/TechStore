@@ -23,8 +23,6 @@ export function useForm(initialValues, validate) {
     
     const validationErrors = validate(form);
 
-    console.log("Resultado da validação:", validationErrors);
-
     if (validationErrors && Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return; 

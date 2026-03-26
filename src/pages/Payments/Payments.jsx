@@ -18,10 +18,13 @@ import {
 import Swal from "sweetalert2";
 import { concluirPedido } from "../../services/orderService";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../hooks/useAuth";
 
 function Pagamento() {
   const navigate = useNavigate();
   const { clearCart } = useCart();
+  const { user } = useAuth();
+  const [saldoUser, setSaldoUser] = useState(0);
 
   const [pedido, setPedido] = useState(null);
   const [metodoAtivo, setMetodoAtivo] = useState("credito");
@@ -41,6 +44,32 @@ function Pagamento() {
     cartao: null,
     data: { valid: null },
   });
+
+  useEffect(() => {
+    const buscarSaldo = async () => {
+      if (user?.usuarioId && user?.usuarioId !== "null") {
+        try {
+          const response = await fetch(
+            `http://localhost:5248/api/Usuarios/GetInfoUsuario/${user.usuarioId}`,
+            {
+              headers: { 
+                Authorization: `Bearer ${user.token}`,
+                "Content-Type": "application/json"
+              },
+            },
+          );
+          if (response.ok) {
+            const data = await response.json();
+            const valor = data.Saldo !== undefined ? data.Saldo : data.saldo;
+            setSaldoUser(Number(valor) || 0);
+          }
+        } catch (error) {
+          console.error("Erro ao buscar saldo:", error);
+        }
+      }
+    };
+    buscarSaldo();
+  }, [user]);
 
   useEffect(() => {
     const pedidoId = localStorage.getItem("pedidoId");
@@ -99,7 +128,16 @@ function Pagamento() {
     validacao.data?.valid &&
     (dadosCard.cvv.length === 3 || dadosCard.cvv.length === 4) &&
     dadosCard.nome.length > 3;
+
   const finalizarPagamento = async () => {
+    if (saldoUser < total) {
+      Swal.fire({
+        icon: "error",
+        title: "Saldo Insuficiente",
+        text: `Seu saldo é de R$ ${saldoUser.toFixed(2)}, mas o total é R$ ${total.toFixed(2)}.`,
+      });
+      return;
+    }
     try {
       setAnalise(true);
       const tipoParaAPI = metodoAtivo.toUpperCase();
@@ -171,7 +209,6 @@ function Pagamento() {
             <h2 className="kb-title-step">Escolha como pagar</h2>
 
             <div className="kb-accordion">
-              {/* PIX */}
               <div
                 className={`kb-accordion-item ${metodoAtivo === "pix" ? "open" : ""}`}
               >
@@ -207,7 +244,6 @@ function Pagamento() {
                 )}
               </div>
 
-              {/* CRÉDITO */}
               <div
                 className={`kb-accordion-item ${metodoAtivo === "credito" ? "open" : ""}`}
               >
@@ -310,7 +346,6 @@ function Pagamento() {
                 )}
               </div>
 
-              {/* DÉBITO */}
               <div
                 className={`kb-accordion-item ${metodoAtivo === "debito" ? "open" : ""}`}
               >
