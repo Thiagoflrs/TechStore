@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import LoginForm from "./components/LoginForm.jsx";
 import RegisterForm from "./components/RegisterForm.jsx";
@@ -15,7 +16,7 @@ function Auth() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="dev-store">
+        <Link to="/" className="dev-store">
           <motion.h1
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -23,7 +24,7 @@ function Auth() {
           >
             TechStore
           </motion.h1>
-        </div>
+        </Link>
 
         <div className="auth-content">
           <div className="auth-tabs">
