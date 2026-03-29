@@ -5,6 +5,7 @@ import Auth from "../pages/Auth/Auth.jsx";
 import Payments from "../pages/Payments/Payments.jsx";
 import Product from "../pages/ProductDetails/ProductDetails.jsx";
 import Category from "../pages/Category/Category.jsx";
+import Dashboard from "../pages/Dashboard/Dashboard.jsx";
 
 function AppRoutes() {
   return (
@@ -15,6 +16,7 @@ function AppRoutes() {
         <Route path={paths.public.payments} element={<Payments />} />
         <Route path={paths.public.productDetails} element={<Product />} />
         <Route path={paths.public.categoryName} element={<Category />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="*" element={<Home />} />
       </Routes>
     </BrowserRouter>
