@@ -1,7 +1,6 @@
 import BrandCard from "./BrandCard.jsx";
 import "./RecommendedBrands.css";
 import logitech from "../../assets/images/brands/logitech.webp";
-import hyperx from "../../assets/images/brands/hyperx.webp";
 import dell from "../../assets/images/brands/dell.webp";
 import amd from "../../assets/images/brands/amd.webp";
 import samsung from "../../assets/images/brands/samsung.webp";
