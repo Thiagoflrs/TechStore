@@ -27,8 +27,7 @@ function LoginForm() {
     setLoading(true);
     setErrorField("");
     try {
-      const { login: loginService } =
-        await import("../../../services/authService");
+      const { login: loginService } = await import("../../../services/authService");
       const response = await loginService(data.email, data.senha);
 
       const idParaCarrinho = response.UsuarioId || response.Id || response.id;
@@ -47,10 +46,15 @@ function LoginForm() {
         showConfirmButton: false,
       });
 
-      navigate(from, { replace: true });
+      const isAdmin = response.Role === "Admin" || response.IsAdmin === true;
+      
+      if (isAdmin) {
+        navigate("/dashboard");
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (error) {
       console.error("Erro no login:", error);
-
       await Swal.fire({
         icon: "error",
         title: "Falha no acesso",
@@ -91,9 +95,7 @@ function LoginForm() {
         <input
           type="email"
           name="email"
-          className={
-            errors.email || errorField === "email" ? "input-error" : ""
-          }
+          className={errors.email || errorField === "email" ? "input-error" : ""}
           placeholder="Email"
           value={form.email}
           onChange={handleChange}
@@ -110,9 +112,7 @@ function LoginForm() {
         <input
           type="password"
           name="senha"
-          className={
-            errors.senha || errorField === "senha" ? "input-error" : ""
-          }
+          className={errors.senha || errorField === "senha" ? "input-error" : ""}
           placeholder="Senha"
           value={form.senha}
           onChange={handleChange}

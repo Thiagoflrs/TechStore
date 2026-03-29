@@ -1,461 +1,281 @@
 import { useState, useEffect } from "react";
-import Header from "../../components/header/Header";
-import Footer from "../../components/footer/Footer";
-import { FiHome, FiBox, FiShoppingBag, FiPlus, FiX, FiDollarSign, FiPieChart, FiUsers, FiGlobe, FiTrendingUp, FiTrash2, FiPlusCircle, FiMinusCircle, FiEdit2, FiTag } from "react-icons/fi";
 import "./Dashboard.css";
+import { 
+  FiPackage, FiUsers, FiPlus, FiEdit3, FiTrash2, FiLogOut, FiHome, FiTag,
+  FiPlusCircle, FiMinusCircle, FiX, FiCheck 
+} from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
-  const [activeTab, setActiveTab] = useState("visao-geral");
+  const [activeTab, setActiveTab] = useState("inventory");
   const [produtos, setProdutos] = useState([]);
-  const [vendas, setVendas] = useState([]);
-  const [usuarios, setUsuarios] = useState([]);
   const [categorias, setCategorias] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [showCatModal, setShowCatModal] = useState(false);
-  const [showStockModal, setShowStockModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [novoProduto, setNovoProduto] = useState({ 
-    id: null, nome: "", valor: "", quantidade: "", categoriaId: "", foto: null 
-  });
-  const [novaCategoriaNome, setNovaCategoriaNome] = useState("");
-  const [stockModalConfig, setStockModalConfig] = useState({ id: null, type: 'in', productName: '', quantity: '' });
-  const [productToDelete, setProductToDelete] = useState({ id: null, name: '' });
+  const [usuarios, setUsuarios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  const getAuthHeaders = () => {
-    const userData = JSON.parse(localStorage.getItem("usuario"));
-    return { "Authorization": `Bearer ${userData?.token}` };
-  };
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isCatModalOpen, setIsCatModalOpen] = useState(false);
+  const [isNovoProdutoModalOpen, setIsNovoProdutoModalOpen] = useState(false);
+  
+  const [itemSelecionado, setItemSelecionado] = useState(null);
+  const [tipoExclusao, setTipoExclusao] = useState(""); 
 
-  const carregarDados = async () => {
-    const headers = getAuthHeaders();
-    try {
-      const resProd = await fetch("http://localhost:5248/api/Produtos", { headers });
-      if (resProd.ok) {
-        const dadosBrutos = await resProd.json();
-        const produtosMapeados = dadosBrutos.map(item => ({
-          id: item.ProdutoId,
-          nome: item.Nome,
-          valor: item.Valor,
-          quantidade: item.Quantidade,
-          categoriaId: item.CategoriaId
-        }));
-        setProdutos(produtosMapeados);
-      }
+  const [novaCatNome, setNovaCatNome] = useState("");
+  const [catEditId, setCatEditId] = useState(null);
+  const [catEditNome, setCatEditNome] = useState("");
 
-      const resUsers = await fetch("http://localhost:5248/api/Usuarios", { headers });
-      if (resUsers.ok) setUsuarios(await resUsers.json());
-
-      const resVendas = await fetch("http://localhost:5248/api/Pedidos", { headers });
-      if (resVendas.ok) setVendas(await resVendas.json());
-
-      const resCat = await fetch("http://localhost:5248/api/Categorias", { headers });
-      if (resCat.ok) setCategorias(await resCat.json());
-    } catch (error) {}
-  };
+  const [novoProduto, setNovoProduto] = useState({ Nome: "", Valor: 0, Quantidade: 0, CategoriaId: "" });
 
   useEffect(() => {
-    carregarDados();
+    const token = localStorage.getItem("token");
+    if (!token) navigate("/login");
+    else carregarDados();
   }, []);
 
-  const fMoeda = (n) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n || 0);
-
-  const aplicarMascaraDinheiro = (valor) => {
-    let v = String(valor).replace(/[^\d,]/g, ""); 
-    v = v.replace(/(\d+)(\d{3})(\d{3})/, "$1.$2.$3");
-    v = v.replace(/(\d+)(\d{3})/, "$1.$2");
-    if (v.includes(",")) {
-      const partes = v.split(",");
-      v = partes[0] + "," + partes[1].slice(0, 2); 
-    }
-    return v ? "R$ " + v : "";
-  };
-
-  const handleSaveProduct = async (e) => {
-    e.preventDefault();
-    const valorLimpo = Number(String(novoProduto.valor).replace("R$ ", "").replace(/\./g, "").replace(",", "."));
-    
-    const formData = new FormData();
-    formData.append("Nome", novoProduto.nome);
-    formData.append("Valor", valorLimpo);
-    formData.append("Quantidade", novoProduto.quantidade);
-    formData.append("CategoriaId", novoProduto.categoriaId);
-    if (novoProduto.foto) formData.append("foto", novoProduto.foto);
-
+  const carregarDados = async () => {
+    const token = localStorage.getItem("token");
+    const headers = { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" };
     try {
-      const url = novoProduto.id 
-        ? `http://localhost:5248/api/Produtos/${novoProduto.id}` 
-        : "http://localhost:5248/api/Produtos";
-      const metodo = novoProduto.id ? "PUT" : "POST";
+      const [resProd, resCat, resUser] = await Promise.all([
+        fetch("http://localhost:5248/api/Produtos", { headers }),
+        fetch("http://localhost:5248/api/Categorias", { headers }),
+        fetch("http://localhost:5248/api/Usuarios", { headers })
+      ]);
 
-      const response = await fetch(url, { 
-        method: metodo, 
-        headers: getAuthHeaders(),
-        body: formData 
-      });
+      if (resProd.status === 401) { localStorage.clear(); navigate("/login"); return; }
 
-      if (response.ok) {
-        carregarDados();
-        setShowModal(false);
-        setNovoProduto({ id: null, nome: "", valor: "", quantidade: "", categoriaId: "", foto: null });
-      }
-    } catch (error) {}
+      const parse = async (res) => {
+        if (!res.ok) return [];
+        const data = await res.json();
+        return data.$values || (Array.isArray(data) ? data : []);
+      };
+
+      setProdutos(await parse(resProd));
+      setCategorias(await parse(resCat));
+      setUsuarios(await parse(resUser));
+    } catch (err) {} finally { setLoading(false); }
   };
 
-  const handleEditClick = (p) => {
-    setNovoProduto({
-      id: p.id,
-      nome: p.nome,
-      valor: aplicarMascaraDinheiro(String(p.valor)),
-      quantidade: p.quantidade,
-      categoriaId: p.categoriaId || "",
-      foto: null
+  const salvarNovoProduto = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    await fetch("http://localhost:5248/api/Produtos", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(novoProduto)
     });
-    setShowModal(true);
+    setIsNovoProdutoModalOpen(false);
+    setNovoProduto({ Nome: "", Valor: 0, Quantidade: 0, CategoriaId: "" });
+    carregarDados();
   };
 
-  const handleAddCategoria = async (e) => {
+  const salvarEdicao = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch("http://localhost:5248/api/Categorias", {
-        method: "POST",
-        headers: {
-          ...getAuthHeaders(),
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ Nome: novaCategoriaNome })
-      });
-
-      if (response.ok) {
-        carregarDados();
-        setShowCatModal(false);
-        setNovaCategoriaNome("");
-      }
-    } catch (error) {}
+    const token = localStorage.getItem("token");
+    await fetch(`http://localhost:5248/api/Produtos/${itemSelecionado.ProdutoId}`, {
+      method: 'PUT',
+      headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(itemSelecionado)
+    });
+    setIsEditModalOpen(false);
+    carregarDados();
   };
 
-  const openStockModal = (id, type, productName) => {
-    setStockModalConfig({ id, type, productName, quantity: '' });
-    setShowStockModal(true);
+  const confirmarExclusao = async () => {
+    const token = localStorage.getItem("token");
+    const url = tipoExclusao === "produto" 
+      ? `http://localhost:5248/api/Produtos/${itemSelecionado.ProdutoId}`
+      : `http://localhost:5248/api/Usuarios/${itemSelecionado.UsuarioId}`;
+    await fetch(url, { method: 'DELETE', headers: { "Authorization": `Bearer ${token}` } });
+    setIsDeleteModalOpen(false);
+    carregarDados();
   };
 
-  const submitStockAction = async (e) => {
-    e.preventDefault();
-    const { id, type, quantity } = stockModalConfig;
-    if (!quantity || isNaN(quantity) || Number(quantity) <= 0) return;
-
-    try {
-      const endpoint = type === 'in' ? 'ReporEstoque' : 'BaixarEstoque';
-      const response = await fetch(`http://localhost:5248/api/Estoque/${endpoint}/${id}`, {
-        method: "PATCH",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({ Quantidade: Number(quantity) }) 
-      });
-      if (response.ok) {
-        carregarDados();
-        setShowStockModal(false);
-      }
-    } catch (error) {}
+  const alterarQtd = async (id, operacao) => {
+    const token = localStorage.getItem("token");
+    const pAlvo = produtos.find(p => p.ProdutoId === id);
+    if (!pAlvo) return;
+    const novaQtd = operacao === 'add' ? pAlvo.Quantidade + 1 : Math.max(0, pAlvo.Quantidade - 1);
+    const pAtu = { ...pAlvo, Quantidade: novaQtd };
+    setProdutos(prev => prev.map(p => p.ProdutoId === id ? pAtu : p));
+    await fetch(`http://localhost:5248/api/Produtos/${id}`, { 
+      method: 'PUT', headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(pAtu)
+    });
   };
 
-  const openDeleteModal = (id, name) => {
-    setProductToDelete({ id, name });
-    setShowDeleteModal(true);
+  const salvarNovaCategoria = async () => {
+    if (!novaCatNome) return;
+    const token = localStorage.getItem("token");
+    await fetch("http://localhost:5248/api/Categorias", {
+      method: "POST", headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ Nome: novaCatNome })
+    });
+    setNovaCatNome("");
+    carregarDados();
   };
 
-  const submitDeleteAction = async () => {
-    try {
-      const response = await fetch(`http://localhost:5248/api/Produtos/${productToDelete.id}`, {
-        method: "DELETE",
-        headers: getAuthHeaders()
-      });
-      if (response.ok) {
-        setProdutos(produtos.filter(p => p.id !== productToDelete.id));
-        setShowDeleteModal(false);
-      }
-    } catch (error) {}
-  };
-
-  const getNomeCategoria = (categoriaId) => {
-    const catEncontrada = categorias.find(c => 
-      c.CategoriaId == categoriaId || 
-      c.Id == categoriaId || 
-      c.id == categoriaId
-    );
-    return catEncontrada ? (catEncontrada.Nome || catEncontrada.nome) : "Sem Categoria";
-  };
-
-  const renderContent = () => {
-    if (activeTab === "visao-geral") {
-      return (
-        <div className="tab-content fade-in">
-          <div className="section-header"><h2>Resumo TechStore</h2></div>
-          <div className="main-stats-grid">
-            <div className="kpi-card blue">
-              <div className="kpi-icon"><FiShoppingBag /></div>
-              <div className="kpi-data"><span>Vendas Totais</span><h3>{vendas.length} pedidos</h3></div>
-            </div>
-            <div className="kpi-card green">
-              <div className="kpi-icon"><FiDollarSign /></div>
-              <div className="kpi-data"><span>Faturamento Total</span><h3>{fMoeda(vendas.reduce((acc, v) => acc + Number(v.valor || v.Valor || 0), 0))}</h3></div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (activeTab === "vendas") {
-      return (
-        <div className="tab-content fade-in">
-          <div className="section-header"><h2>Histórico de Vendas</h2></div>
-          <table className="db-table">
-            <thead><tr><th>ID Venda</th><th>ID Cliente</th><th>Valor</th><th>Status</th></tr></thead>
-            <tbody>
-              {vendas.map((v, i) => (
-                <tr key={i}>
-                  <td>#{v.id || v.Id}</td>
-                  <td>USR-{v.usuarioId || v.UsuarioId}</td>
-                  <td className="txt-green">{fMoeda(v.valor || v.Valor)}</td>
-                  <td>{v.status || v.Status || "Processado"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
-
-    if (activeTab === "inventario") {
-      return (
-        <div className="tab-content fade-in">
-          <div className="inventory-header">
-            <h2>Estoque</h2>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button className="btn-add-item cat-btn" onClick={() => setShowCatModal(true)}>
-                <FiTag /> Nova Categoria
-              </button>
-              <button className="btn-add-item" onClick={() => {
-                setNovoProduto({ id: null, nome: "", valor: "", quantidade: "", categoriaId: "", foto: null });
-                setShowModal(true);
-              }}>
-                <FiPlus /> Novo Produto
-              </button>
-            </div>
-          </div>
-          <table className="db-table">
-            <thead><tr><th>ProdutoId</th><th>Nome</th><th>Categoria</th><th>Valor</th><th>Quantidade</th><th>Ações</th></tr></thead>
-            <tbody>
-              {produtos.map((p, i) => (
-                <tr key={i}>
-                  <td><strong>#{p.id}</strong></td>
-                  <td><strong>{p.nome}</strong></td>
-                  <td><span className="badge-cat">{getNomeCategoria(p.categoriaId)}</span></td>
-                  <td>{fMoeda(p.valor)}</td>
-                  <td>{p.quantidade} un</td>
-                  <td>
-                    <div className="actions-group">
-                      <button className="action-btn add" onClick={() => openStockModal(p.id, 'in', p.nome)} title="Repor Estoque">
-                        <FiPlusCircle size={18} />
-                      </button>
-                      <button className="action-btn remove" onClick={() => openStockModal(p.id, 'out', p.nome)} title="Baixar Estoque">
-                        <FiMinusCircle size={18} />
-                      </button>
-                      <button className="action-btn edit" onClick={() => handleEditClick(p)} title="Editar Produto">
-                        <FiEdit2 size={18} />
-                      </button>
-                      <button className="action-btn delete" onClick={() => openDeleteModal(p.id, p.nome)} title="Excluir Produto">
-                        <FiTrash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
-
-    if (activeTab === "graficos") {
-      const produtosDisponiveis = produtos.filter(p => p.quantidade > 0).length;
-      const produtosEsgotados = produtos.length - produtosDisponiveis;
-      const pctDisponivel = produtos.length > 0 ? (produtosDisponiveis / produtos.length) * 100 : 0;
-      const pctEsgotado = produtos.length > 0 ? (produtosEsgotados / produtos.length) * 100 : 0;
-
-      const contagemCategorias = {};
-      produtos.forEach(p => {
-        const nomeCat = getNomeCategoria(p.categoriaId);
-        contagemCategorias[nomeCat] = (contagemCategorias[nomeCat] || 0) + 1;
-      });
-      const listaCategorias = Object.entries(contagemCategorias).sort((a, b) => b[1] - a[1]);
-
-      return (
-        <div className="tab-content fade-in">
-          <div className="section-header"><h2>Performance</h2></div>
-          <div className="charts-grid">
-            <div className="chart-card">
-              <div className="card-header"><FiGlobe color="#28a745" /> <h3>Clientes na Base</h3></div>
-              <div className="client-display">
-                <div className="online-circle">
-                  <div className="pulse"></div>
-                  <strong>{usuarios.length}</strong>
-                  <span>Registrados</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="chart-card">
-              <div className="card-header"><FiPieChart color="#007bff" /> <h3>Status do Estoque</h3></div>
-              <div className="rank-list">
-                <div className="rank-item">
-                  <span>Disponível</span>
-                  <div className="bar-bg"><div className="bar-fill blue" style={{width: `${pctDisponivel}%`}}></div></div>
-                  <strong>{Math.round(pctDisponivel)}%</strong>
-                </div>
-                <div className="rank-item">
-                  <span>Esgotado</span>
-                  <div className="bar-bg"><div className="bar-fill red" style={{width: `${pctEsgotado}%`}}></div></div>
-                  <strong>{Math.round(pctEsgotado)}%</strong>
-                </div>
-              </div>
-            </div>
-
-            <div className="chart-card full" style={{ gridColumn: 'span 2' }}>
-              <div className="card-header"><FiBox color="#17a2b8" /> <h3>Produtos por Categoria</h3></div>
-              <div className="rank-list">
-                {listaCategorias.map(([nome, qtd], index) => {
-                  const percent = produtos.length > 0 ? (qtd / produtos.length) * 100 : 0;
-                  return (
-                    <div className="rank-item" key={index}>
-                      <span style={{ minWidth: '120px' }}>{nome}</span>
-                      <div className="bar-bg"><div className="bar-fill" style={{width: `${percent}%`, backgroundColor: '#17a2b8'}}></div></div>
-                      <strong>{qtd} {qtd === 1 ? 'produto' : 'produtos'}</strong>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-  };
+  if (loading) return <div className="loading-screen">Carregando...</div>;
 
   return (
-    <div className="dashboard-wrapper">
-      <Header />
-      <div className="dashboard-layout">
-        <aside className="sidebar">
-          <nav className="sidebar-nav">
-            <button className={activeTab === "visao-geral" ? "active" : ""} onClick={() => setActiveTab("visao-geral")}><FiHome /> Home</button>
-            <button className={activeTab === "vendas" ? "active" : ""} onClick={() => setActiveTab("vendas")}><FiShoppingBag /> Vendas</button>
-            <button className={activeTab === "inventario" ? "active" : ""} onClick={() => setActiveTab("inventario")}><FiBox /> Estoque</button>
-            <button className={activeTab === "graficos" ? "active" : ""} onClick={() => setActiveTab("graficos")}><FiPieChart /> Gráficos</button>
-          </nav>
-        </aside>
-        <main className="content-area">{renderContent()}</main>
-      </div>
+    <div className="dashboard-container">
+      <aside className="sidebar-fixed">
+        <div className="sidebar-logo"><h2>TechStore</h2></div>
+        <nav className="sidebar-menu">
+          <button className={activeTab === "inventory" ? "active" : ""} onClick={() => setActiveTab("inventory")}><FiPackage /> Estoque</button>
+          <button className={activeTab === "customers" ? "active" : ""} onClick={() => setActiveTab("customers")}><FiUsers /> Clientes</button>
+        </nav>
+        <div className="sidebar-bottom">
+          <button onClick={() => navigate("/")} className="btn-nav-home"><FiHome /> Loja</button>
+          <button onClick={() => { localStorage.clear(); navigate("/login"); }} className="btn-nav-logout"><FiLogOut /> Sair</button>
+        </div>
+      </aside>
 
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-card fade-in">
-            <div className="modal-header">
-              <h3>{novoProduto.id ? "Editar Produto" : "Novo Produto"}</h3>
-              <button className="btn-close-modal" onClick={() => setShowModal(false)}><FiX /></button>
+      <main className="dashboard-main">
+        {activeTab === "inventory" ? (
+          <div className="tab-content fade-in">
+            <div className="inventory-header">
+              <h1>Estoque</h1>
+              <div className="header-actions">
+                <button className="btn-category" onClick={() => setIsCatModalOpen(true)}><FiTag /> Categorias</button>
+                <button className="btn-product" onClick={() => setIsNovoProdutoModalOpen(true)}><FiPlus /> Novo Produto</button>
+              </div>
             </div>
-            <form onSubmit={handleSaveProduct}>
-              <input type="text" placeholder="Nome do Produto" value={novoProduto.nome} onChange={(e) => setNovoProduto({...novoProduto, nome: e.target.value})} required />
-              
-              <select 
-                value={novoProduto.categoriaId} 
-                onChange={(e) => setNovoProduto({...novoProduto, categoriaId: e.target.value})} 
-                required
-                style={{ width: '100%', padding: '12px', marginBottom: '12px', border: '1px solid #ddd', borderRadius: '6px', outline: 'none' }}
-              >
-                <option value="">Selecione uma Categoria</option>
-                {categorias.map((c, i) => (
-                  <option key={i} value={c.Id || c.id}>{c.Nome || c.nome}</option>
+            <table className="stock-table">
+              <thead>
+                <tr><th>ID</th><th>NOME</th><th>CATEGORIA</th><th>VALOR</th><th>QUANTIDADE</th><th>AÇÕES</th></tr>
+              </thead>
+              <tbody>
+                {produtos.map((p) => (
+                  <tr key={p.ProdutoId}>
+                    <td>#{p.ProdutoId}</td>
+                    <td><strong>{p.Nome}</strong></td>
+                    <td><span className="cat-badge">{categorias.find(c => c.CategoriaId === p.CategoriaId)?.Nome || "Geral"}</span></td>
+                    <td>R$ {p.Valor?.toFixed(2)}</td>
+                    <td className="qtd-number">{p.Quantidade}</td>
+                    <td>
+                      <div className="stock-actions">
+                        <button className="action-btn add" onClick={() => alterarQtd(p.ProdutoId, 'add')}><FiPlusCircle /></button>
+                        <button className="action-btn sub" onClick={() => alterarQtd(p.ProdutoId, 'sub')}><FiMinusCircle /></button>
+                        <button className="action-btn edit" onClick={() => { setItemSelecionado({...p}); setIsEditModalOpen(true); }}><FiEdit3 /></button>
+                        <button className="action-btn delete" onClick={() => { setItemSelecionado(p); setTipoExclusao("produto"); setIsDeleteModalOpen(true); }}><FiTrash2 /></button>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-              </select>
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="tab-content fade-in">
+            <h1>Lista de Clientes</h1>
+            <table className="stock-table">
+              <thead>
+                <tr><th>NOME</th><th>EMAIL</th><th>IDADE</th><th>PERFIL</th><th>AÇÕES</th></tr>
+              </thead>
+              <tbody>
+                {usuarios.map((u) => (
+                  <tr key={u.UsuarioId}>
+                    <td><strong>{u.Nome}</strong></td>
+                    <td>{u.Email}</td>
+                    <td>{u.Idade} anos</td>
+                    <td><span className="cat-badge">{u.Perfil === 0 ? "Admin" : "Cliente"}</span></td>
+                    <td>
+                      <button className="action-btn delete" onClick={() => { setItemSelecionado(u); setTipoExclusao("cliente"); setIsDeleteModalOpen(true); }}><FiTrash2 /></button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-              <div className="input-row">
-                <input type="text" placeholder="R$ 0,00" value={novoProduto.valor} onChange={(e) => setNovoProduto({...novoProduto, valor: aplicarMascaraDinheiro(e.target.value)})} required />
-                <input type="text" placeholder="Qtd Inicial" value={novoProduto.quantidade} onChange={(e) => setNovoProduto({...novoProduto, quantidade: e.target.value.replace(/\D/g, "")})} required disabled={!!novoProduto.id} />
+        {/* MODAL CATEGORIAS */}
+        {isCatModalOpen && (
+          <div className="modal-overlay">
+            <div className="modal-content fade-in" style={{ maxWidth: '550px' }}>
+              <div className="modal-header"><h2>Categorias</h2><button className="modal-close-x" onClick={() => setIsCatModalOpen(false)}><FiX /></button></div>
+              <div className="cat-add-row">
+                <input type="text" placeholder="Nova..." value={novaCatNome} onChange={(e) => setNovaCatNome(e.target.value)} />
+                <button onClick={salvarNovaCategoria} className="btn-product">Criar</button>
               </div>
-              <div className="file-upload-box">
-                <label htmlFor="file-id" className="custom-file-btn">{novoProduto.foto ? novoProduto.foto.name : "Selecionar Foto"}</label>
-                <input id="file-id" type="file" style={{display: 'none'}} onChange={(e) => setNovoProduto({...novoProduto, foto: e.target.files[0]})} />
+              <div className="cat-list-container">
+                <table className="stock-table" style={{ marginTop: 0 }}>
+                  <tbody>
+                    {categorias.map(c => (
+                      <tr key={c.CategoriaId}>
+                        <td style={{ width: '100%' }}><strong>{c.Nome}</strong></td>
+                        <td>
+                          <button className="action-btn delete" onClick={async () => {
+                            const token = localStorage.getItem("token");
+                            await fetch(`http://localhost:5248/api/Categorias/${c.CategoriaId}`, { method: 'DELETE', headers: { "Authorization": `Bearer ${token}` } });
+                            carregarDados();
+                          }}><FiTrash2 /></button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <button type="submit" className="btn-submit-form">{novoProduto.id ? "Salvar Alterações" : "Confirmar Cadastro"}</button>
-            </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {showCatModal && (
-        <div className="modal-overlay">
-          <div className="modal-card fade-in" style={{ width: '350px' }}>
-            <div className="modal-header">
-              <h3>Nova Categoria</h3>
-              <button className="btn-close-modal" onClick={() => setShowCatModal(false)}><FiX /></button>
+        {/* MODAL NOVO PRODUTO */}
+        {isNovoProdutoModalOpen && (
+          <div className="modal-overlay">
+            <div className="modal-content fade-in">
+              <div className="modal-header"><h2>Cadastrar Novo Produto</h2><button className="modal-close-x" onClick={() => setIsNovoProdutoModalOpen(false)}><FiX /></button></div>
+              <form onSubmit={salvarNovoProduto}>
+                <div className="form-group"><label>Nome</label><input type="text" required value={novoProduto.Nome} onChange={(e) => setNovoProduto({...novoProduto, Nome: e.target.value})} /></div>
+                <div className="form-row">
+                  <div className="form-group"><label>Valor (R$)</label><input type="number" step="0.01" required value={novoProduto.Valor} onChange={(e) => setNovoProduto({...novoProduto, Valor: parseFloat(e.target.value)})} /></div>
+                  <div className="form-group"><label>Quantidade</label><input type="number" required value={novoProduto.Quantidade} onChange={(e) => setNovoProduto({...novoProduto, Quantidade: parseInt(e.target.value)})} /></div>
+                </div>
+                <div className="form-group">
+                  <label>Categoria</label>
+                  <select required value={novoProduto.CategoriaId} onChange={(e) => setNovoProduto({...novoProduto, CategoriaId: parseInt(e.target.value)})}>
+                    <option value="">Selecione...</option>
+                    {categorias.map(c => <option key={c.CategoriaId} value={c.CategoriaId}>{c.Nome}</option>)}
+                  </select>
+                </div>
+                <div className="modal-footer"><button type="button" className="btn-cancel" onClick={() => setIsNovoProdutoModalOpen(false)}>Cancelar</button><button type="submit" className="btn-save-blue">Cadastrar</button></div>
+              </form>
             </div>
-            <form onSubmit={handleAddCategoria}>
-              <input type="text" placeholder="Nome da Categoria (Ex: Monitores)" value={novaCategoriaNome} onChange={(e) => setNovaCategoriaNome(e.target.value)} required />
-              <button type="submit" className="btn-submit-form" style={{ background: '#17a2b8' }}>Salvar Categoria</button>
-            </form>
           </div>
-        </div>
-      )}
+        )}
 
-      {showStockModal && (
-        <div className="modal-overlay">
-          <div className="modal-card fade-in" style={{ width: '400px' }}>
-            <div className="modal-header">
-              <h3>{stockModalConfig.type === 'in' ? "Repor Estoque" : "Baixar Estoque"}</h3>
-              <button className="btn-close-modal" onClick={() => setShowStockModal(false)}><FiX /></button>
+        {/* MODAL EDITAR */}
+        {isEditModalOpen && (
+          <div className="modal-overlay">
+            <div className="modal-content fade-in">
+              <div className="modal-header"><h2>Editar Produto</h2><button className="modal-close-x" onClick={() => setIsEditModalOpen(false)}><FiX /></button></div>
+              <form onSubmit={salvarEdicao}>
+                <div className="form-group"><label>Nome</label><input type="text" value={itemSelecionado?.Nome} onChange={(e) => setItemSelecionado({...itemSelecionado, Nome: e.target.value})} /></div>
+                <div className="form-group"><label>Valor</label><input type="number" step="0.01" value={itemSelecionado?.Valor} onChange={(e) => setItemSelecionado({...itemSelecionado, Valor: parseFloat(e.target.value)})} /></div>
+                <div className="modal-footer"><button type="button" className="btn-cancel" onClick={() => setIsEditModalOpen(false)}>Cancelar</button><button type="submit" className="btn-save-blue">Salvar</button></div>
+              </form>
             </div>
-            <form onSubmit={submitStockAction}>
-              <p style={{marginBottom: '15px', color: '#666'}}>Produto: <strong>{stockModalConfig.productName}</strong></p>
-              <input 
-                type="text" 
-                placeholder="Quantidade" 
-                value={stockModalConfig.quantity} 
-                onChange={(e) => setStockModalConfig({...stockModalConfig, quantity: e.target.value.replace(/\D/g, "")})} 
-                required 
-              />
-              <div className="input-row" style={{marginTop: '15px'}}>
-                <button type="button" className="btn-submit-form cancel-btn" onClick={() => setShowStockModal(false)}>Cancelar</button>
-                <button type="submit" className={`btn-submit-form ${stockModalConfig.type === 'in' ? 'add-btn' : 'remove-btn'}`}>
-                  {stockModalConfig.type === 'in' ? "Adicionar" : "Remover"}
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+        )}
 
-      {showDeleteModal && (
-        <div className="modal-overlay">
-          <div className="modal-card fade-in" style={{ width: '400px', textAlign: 'center' }}>
-            <div className="modal-header">
-              <h3 style={{color: '#dc3545'}}>Confirmar Exclusão</h3>
-              <button className="btn-close-modal" onClick={() => setShowDeleteModal(false)}><FiX /></button>
-            </div>
-            <div style={{padding: '20px 0'}}>
-              <FiTrash2 size={50} color="#dc3545" style={{marginBottom: '15px'}}/>
-              <p>Tem certeza que deseja excluir o produto?</p>
-              <strong style={{fontSize: '18px'}}>{productToDelete.name}</strong>
-              <p style={{fontSize: '12px', color: '#999', marginTop: '10px'}}>Esta ação não poderá ser desfeita.</p>
-            </div>
-            <div className="input-row">
-              <button type="button" className="btn-submit-form cancel-btn" onClick={() => setShowDeleteModal(false)}>Cancelar</button>
-              <button type="button" className="btn-submit-form remove-btn" onClick={submitDeleteAction}>Excluir</button>
+        {/* MODAL EXCLUSÃO */}
+        {isDeleteModalOpen && (
+          <div className="modal-overlay">
+            <div className="modal-confirm-new fade-in">
+              <button className="modal-close-circle" onClick={() => setIsDeleteModalOpen(false)}><FiX /></button>
+              <div className="confirm-icon-box"><FiTrash2 /></div>
+              <h3>Confirmar Exclusão</h3>
+              <p>Tem certeza que deseja excluir este {tipoExclusao}?</p>
+              <h2 className="confirm-item-name">{itemSelecionado?.Nome}</h2>
+              <div className="confirm-actions"><button className="btn-cancel-gray" onClick={() => setIsDeleteModalOpen(false)}>Cancelar</button><button className="btn-confirm-red" onClick={confirmarExclusao}>Excluir</button></div>
             </div>
           </div>
-        </div>
-      )}
-      <Footer />
+        )}
+      </main>
     </div>
   );
 }
-
 export default Dashboard;
