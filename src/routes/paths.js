@@ -6,6 +6,10 @@ export const paths = {
     payments: "/payments",
     productDetails: "/product/:id",
     categoryName: "/categoria/:nomeCategoria"
+  },
+
+  private: {
+    dashboard: "/dashboard"
   }
 
 };

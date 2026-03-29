@@ -1,8 +1,9 @@
-import { Search, ShoppingBasket, User, Heart, Headset, LogOut } from "lucide-react";
+import { Search, ShoppingBasket, User, Heart, Headset, LogOut, Wrench } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../../hooks/useAuth";
+import { getUser } from "../../services/userService";
 import { useCart } from "../../context/CartContext";
 import CartDrawer from "../cart/CartDrawer";
 import "./Header.css";
@@ -13,9 +14,13 @@ function Header() {
   const { user, logout } = useAuth();
   const { cartCount, setUserId } = useCart();
   const navigate = useNavigate();
+
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [perfil, setPerfil] = useState(null);
+  const [tipoPerfil, setTipoPerfil] = useState(null);
+
+  const hasFetched = useRef(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -33,34 +38,61 @@ function Header() {
       const response = await fetch(`http://localhost:5248/api/Usuarios/GetInfoUsuario/${user.usuarioId}`, {
         method: 'GET',
         headers: { 
-          "Authorization": `Bearer ${user.token}`,
+          Authorization: `Bearer ${user.token}`,
           "Content-Type": "application/json"
         }
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setPerfil({
-          nome: data.Nome ?? "Usuário", 
-          saldo: data.Saldo ?? 0
-        });
-      } else {
-        setPerfil({ nome: "Usuário", saldo: 0 });
+      if (!response.ok) {
+        console.error("Erro ao buscar dados do usuário:", response.status);
+        return;
       }
+
+      const data = await response.json();
+
+      setPerfil({
+        nome: data.Nome ?? "Usuário",
+        saldo: data.Saldo ?? 0
+      });
+
     } catch (error) {
-      setPerfil({ nome: "Usuário", saldo: 0 });
+      console.error("Erro na requisição do perfil:", error);
     }
   }, [user]);
 
+  const carregarPerfilUsuario = useCallback(async () => {
+    if (!user?.usuarioId) return;
+
+    try {
+      const data = await getUser(user.usuarioId, user.token);
+
+      const perfil = data?.Perfil ?? null;
+      setTipoPerfil(perfil);
+
+      if (perfil?.toUpperCase() !== "ADMINISTRADOR") {
+        await carregarDadosUsuario();
+      }
+
+    } catch (error) {
+      console.error("Erro ao buscar tipo de perfil:", error);
+      setTipoPerfil(null);
+    }
+  }, [user, carregarDadosUsuario]);
+
   useEffect(() => {
-    carregarDadosUsuario();
-  }, [carregarDadosUsuario]);
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
+    carregarPerfilUsuario();
+  }, [carregarPerfilUsuario]);
 
   const handleLogout = async () => {
     try {
       await logout();
       setUserId(null);
       setPerfil(null);
+      setTipoPerfil(null);
+
       await Swal.fire({
         icon: 'success',
         title: 'Sucesso!',
@@ -68,6 +100,7 @@ function Header() {
         timer: 1500,
         showConfirmButton: false,
       });
+
       navigate("/");
     } catch (error) {
       Swal.fire({ icon: 'error', title: 'Ops...', text: 'Erro ao sair.' });
@@ -93,16 +126,24 @@ function Header() {
 
         <div className="actions">
           {user ? (
-            <div className="login-logged">
-              <User size={25} className="login-icon" />
-              <div className="login-text">
-                <span>Olá, {perfil?.nome || "Carregando..."}!</span>
-                <strong>Saldo: {formatarMoeda(perfil?.saldo)}</strong>
+            tipoPerfil?.toUpperCase() === "ADMINISTRADOR" ? (
+              <div className="login-logged">
+                <button onClick={handleLogout} className="logout-button" title="Sair">
+                  <LogOut size={20} />
+                </button>
               </div>
-              <button onClick={handleLogout} className="logout-button" title="Sair">
-                <LogOut size={20} />
-              </button>
-            </div>
+            ) : (
+              <div className="login-logged">
+                <User size={25} className="login-icon" />
+                <div className="login-text">
+                  <span>Olá, {perfil?.nome || "Usuário"}!</span>
+                  <strong>Saldo: {formatarMoeda(perfil?.saldo)}</strong>
+                </div>
+                <button onClick={handleLogout} className="logout-button" title="Sair">
+                  <LogOut size={20} />
+                </button>
+              </div>
+            )
           ) : (
             <Link to="/Auth" className="login">
               <User size={25} className="login-icon" />
@@ -113,8 +154,19 @@ function Header() {
             </Link>
           )}
 
-          <Link to="/atendimento" className="action-item"><Headset size={24} /></Link>
-          <Link to="/favoritos" className="action-item"><Heart size={24} /></Link>
+          {tipoPerfil?.toUpperCase() === "ADMINISTRADOR" && (
+            <Link to="/dashboard" className="action-item" title="Admin">
+              <Wrench size={24} />
+            </Link>
+          )}
+
+          <Link to="/atendimento" className="action-item" title="Atendimento">
+            <Headset size={24} />
+          </Link>
+
+          <Link to="/favoritos" className="action-item" title="Favoritos">
+            <Heart size={24} />
+          </Link>
 
           <button className="cart" onClick={() => setIsCartOpen(true)}>
             <motion.div
@@ -127,6 +179,7 @@ function Header() {
           </button>
         </div>
       </div>
+
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </header>
   );
