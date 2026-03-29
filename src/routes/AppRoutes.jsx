@@ -10,8 +10,10 @@ function AppRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Auth />} />
         <Route path="/register" element={<Auth />} />
+        
+        {/* Adicionei esta linha para evitar o erro "No routes matched" */}
+        <Route path="/Auth" element={<Auth />} />
 
-        {/* Rota do Dashboard liberada para teste */}
         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
