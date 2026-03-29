@@ -13,10 +13,7 @@ const brands = [
     name: "Logitech",
     logo: logitech,
   },
-  {
-    name: "HyperX",
-    logo: hyperx,
-  },
+
   {
     name: "Dell",
     logo: dell,
