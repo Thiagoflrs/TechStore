@@ -21,7 +21,7 @@ function Dashboard() {
   
   const [itemSelecionado, setItemSelecionado] = useState(null);
   const [tipoExclusao, setTipoExclusao] = useState(""); 
-
+  
   const [novaCatNome, setNovaCatNome] = useState("");
   const [catEditId, setCatEditId] = useState(null);
   const [catEditNome, setCatEditNome] = useState("");
@@ -30,32 +30,44 @@ function Dashboard() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) navigate("/login");
-    else carregarDados();
+    if (!token) {
+      navigate("/login");
+    } else {
+      carregarDados();
+    }
   }, []);
 
   const carregarDados = async () => {
     const token = localStorage.getItem("token");
     const headers = { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" };
+    
+    const safeFetch = async (url) => {
+      try {
+        const res = await fetch(url, { headers });
+        if (res.status === 401) { localStorage.clear(); navigate("/login"); return []; }
+        if (!res.ok) return []; 
+        const data = await res.json();
+        return data?.$values || (Array.isArray(data) ? data : []);
+      } catch (error) {
+        return [];
+      }
+    };
+
     try {
       const [resProd, resCat, resUser] = await Promise.all([
-        fetch("http://localhost:5248/api/Produtos", { headers }),
-        fetch("http://localhost:5248/api/Categorias", { headers }),
-        fetch("http://localhost:5248/api/Usuarios", { headers })
+        safeFetch("http://localhost:5248/api/Produtos"),
+        safeFetch("http://localhost:5248/api/Categorias"),
+        safeFetch("http://localhost:5248/api/Usuarios")
       ]);
 
-      if (resProd.status === 401) { localStorage.clear(); navigate("/login"); return; }
-
-      const parse = async (res) => {
-        if (!res.ok) return [];
-        const data = await res.json();
-        return data.$values || (Array.isArray(data) ? data : []);
-      };
-
-      setProdutos(await parse(resProd));
-      setCategorias(await parse(resCat));
-      setUsuarios(await parse(resUser));
-    } catch (err) {} finally { setLoading(false); }
+      setProdutos(resProd || []);
+      setCategorias(resCat || []);
+      setUsuarios(resUser || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const salvarNovoProduto = async (e) => {
@@ -83,31 +95,33 @@ function Dashboard() {
     carregarDados();
   };
 
-  const confirmarExclusao = async () => {
-    const token = localStorage.getItem("token");
-    const url = tipoExclusao === "produto" 
-      ? `http://localhost:5248/api/Produtos/${itemSelecionado.ProdutoId}`
-      : `http://localhost:5248/api/Usuarios/${itemSelecionado.UsuarioId}`;
-    await fetch(url, { method: 'DELETE', headers: { "Authorization": `Bearer ${token}` } });
-    setIsDeleteModalOpen(false);
-    carregarDados();
-  };
-
   const alterarQtd = async (id, operacao) => {
     const token = localStorage.getItem("token");
-    const pAlvo = produtos.find(p => p.ProdutoId === id);
+    const pAlvo = produtos?.find(p => p.ProdutoId === id);
     if (!pAlvo) return;
     const novaQtd = operacao === 'add' ? pAlvo.Quantidade + 1 : Math.max(0, pAlvo.Quantidade - 1);
     const pAtu = { ...pAlvo, Quantidade: novaQtd };
-    setProdutos(prev => prev.map(p => p.ProdutoId === id ? pAtu : p));
+    
+    setProdutos(prev => prev?.map(p => p.ProdutoId === id ? pAtu : p));
+    
     await fetch(`http://localhost:5248/api/Produtos/${id}`, { 
       method: 'PUT', headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify(pAtu)
     });
   };
 
+  const confirmarExclusao = async () => {
+    const token = localStorage.getItem("token");
+    const url = tipoExclusao === "produto" 
+      ? `http://localhost:5248/api/Produtos/${itemSelecionado.ProdutoId}` 
+      : `http://localhost:5248/api/Usuarios/${itemSelecionado.UsuarioId}`;
+    await fetch(url, { method: 'DELETE', headers: { "Authorization": `Bearer ${token}` } });
+    setIsDeleteModalOpen(false);
+    carregarDados();
+  };
+
   const salvarNovaCategoria = async () => {
-    if (!novaCatNome) return;
+    if (!novaCatNome.trim()) return;
     const token = localStorage.getItem("token");
     await fetch("http://localhost:5248/api/Categorias", {
       method: "POST", headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
@@ -117,7 +131,30 @@ function Dashboard() {
     carregarDados();
   };
 
-  if (loading) return <div className="loading-screen">Carregando...</div>;
+  const excluirCategoria = async (id) => {
+    const token = localStorage.getItem("token");
+    await fetch(`http://localhost:5248/api/Categorias/${id}`, { method: 'DELETE', headers: { "Authorization": `Bearer ${token}` } });
+    carregarDados();
+  };
+
+  const salvarEdicaoCategoria = async (id) => {
+    if (!catEditNome.trim()) return;
+    const token = localStorage.getItem("token");
+    try {
+      await fetch(`http://localhost:5248/api/Categorias/${id}`, {
+        method: 'PUT',
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ CategoriaId: id, Nome: catEditNome })
+      });
+      setCatEditId(null);
+      setCatEditNome("");
+      carregarDados();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (loading) return <div className="loading-screen">Carregando dados...</div>;
 
   return (
     <div className="dashboard-container">
@@ -134,7 +171,7 @@ function Dashboard() {
       </aside>
 
       <main className="dashboard-main">
-        {activeTab === "inventory" ? (
+        {activeTab === "inventory" && (
           <div className="tab-content fade-in">
             <div className="inventory-header">
               <h1>Estoque</h1>
@@ -148,18 +185,18 @@ function Dashboard() {
                 <tr><th>ID</th><th>NOME</th><th>CATEGORIA</th><th>VALOR</th><th>QUANTIDADE</th><th>AÇÕES</th></tr>
               </thead>
               <tbody>
-                {produtos.map((p) => (
+                {produtos?.map(p => (
                   <tr key={p.ProdutoId}>
                     <td>#{p.ProdutoId}</td>
                     <td><strong>{p.Nome}</strong></td>
-                    <td><span className="cat-badge">{categorias.find(c => c.CategoriaId === p.CategoriaId)?.Nome || "Geral"}</span></td>
+                    <td><span className="cat-badge">{categorias?.find(c => c.CategoriaId === p.CategoriaId)?.Nome || "Geral"}</span></td>
                     <td>R$ {p.Valor?.toFixed(2)}</td>
                     <td className="qtd-number">{p.Quantidade}</td>
                     <td>
                       <div className="stock-actions">
                         <button className="action-btn add" onClick={() => alterarQtd(p.ProdutoId, 'add')}><FiPlusCircle /></button>
                         <button className="action-btn sub" onClick={() => alterarQtd(p.ProdutoId, 'sub')}><FiMinusCircle /></button>
-                        <button className="action-btn edit" onClick={() => { setItemSelecionado({...p}); setIsEditModalOpen(true); }}><FiEdit3 /></button>
+                        <button className="action-btn edit" onClick={() => { setItemSelecionado(p); setIsEditModalOpen(true); }}><FiEdit3 /></button>
                         <button className="action-btn delete" onClick={() => { setItemSelecionado(p); setTipoExclusao("produto"); setIsDeleteModalOpen(true); }}><FiTrash2 /></button>
                       </div>
                     </td>
@@ -168,23 +205,23 @@ function Dashboard() {
               </tbody>
             </table>
           </div>
-        ) : (
+        )}
+
+        {activeTab === "customers" && (
           <div className="tab-content fade-in">
-            <h1>Lista de Clientes</h1>
-            <table className="stock-table">
+             <div className="inventory-header"><h1>Clientes</h1></div>
+             <table className="stock-table">
               <thead>
                 <tr><th>NOME</th><th>EMAIL</th><th>IDADE</th><th>PERFIL</th><th>AÇÕES</th></tr>
               </thead>
               <tbody>
-                {usuarios.map((u) => (
+                {usuarios?.map(u => (
                   <tr key={u.UsuarioId}>
                     <td><strong>{u.Nome}</strong></td>
                     <td>{u.Email}</td>
                     <td>{u.Idade} anos</td>
                     <td><span className="cat-badge">{u.Perfil === 0 ? "Admin" : "Cliente"}</span></td>
-                    <td>
-                      <button className="action-btn delete" onClick={() => { setItemSelecionado(u); setTipoExclusao("cliente"); setIsDeleteModalOpen(true); }}><FiTrash2 /></button>
-                    </td>
+                    <td><button className="action-btn delete" onClick={() => { setItemSelecionado(u); setTipoExclusao("cliente"); setIsDeleteModalOpen(true); }}><FiTrash2 /></button></td>
                   </tr>
                 ))}
               </tbody>
@@ -192,42 +229,57 @@ function Dashboard() {
           </div>
         )}
 
-        {/* MODAL CATEGORIAS */}
         {isCatModalOpen && (
           <div className="modal-overlay">
-            <div className="modal-content fade-in" style={{ maxWidth: '550px' }}>
-              <div className="modal-header"><h2>Categorias</h2><button className="modal-close-x" onClick={() => setIsCatModalOpen(false)}><FiX /></button></div>
+            <div className="modal-content fade-in" style={{ width: '550px' }}>
+              <div className="modal-header">
+                <h2>Categorias</h2>
+                <button className="modal-close-x" onClick={() => { setIsCatModalOpen(false); setCatEditId(null); }}><FiX /></button>
+              </div>
+              
               <div className="cat-add-row">
-                <input type="text" placeholder="Nova..." value={novaCatNome} onChange={(e) => setNovaCatNome(e.target.value)} />
+                <input type="text" placeholder="Nova Categoria..." value={novaCatNome} onChange={(e) => setNovaCatNome(e.target.value)} />
                 <button onClick={salvarNovaCategoria} className="btn-product">Criar</button>
               </div>
+              
               <div className="cat-list-container">
-                <table className="stock-table" style={{ marginTop: 0 }}>
-                  <tbody>
-                    {categorias.map(c => (
-                      <tr key={c.CategoriaId}>
-                        <td style={{ width: '100%' }}><strong>{c.Nome}</strong></td>
-                        <td>
-                          <button className="action-btn delete" onClick={async () => {
-                            const token = localStorage.getItem("token");
-                            await fetch(`http://localhost:5248/api/Categorias/${c.CategoriaId}`, { method: 'DELETE', headers: { "Authorization": `Bearer ${token}` } });
-                            carregarDados();
-                          }}><FiTrash2 /></button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                {categorias?.map(c => (
+                  <div key={c.CategoriaId} className="cat-item-row" style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}>
+                    {catEditId === c.CategoriaId ? (
+                      <div style={{ display: 'flex', gap: '10px', flex: 1, marginRight: '10px' }}>
+                        <input 
+                          type="text" 
+                          value={catEditNome} 
+                          onChange={(e) => setCatEditNome(e.target.value)}
+                          style={{ flex: 1, padding: '8px 12px', border: '1px solid #3b82f6', borderRadius: '8px', outline: 'none' }}
+                          autoFocus
+                        />
+                        <button className="action-btn add" onClick={() => salvarEdicaoCategoria(c.CategoriaId)} title="Salvar"><FiCheck /></button>
+                        <button className="action-btn delete" onClick={() => setCatEditId(null)} title="Cancelar"><FiX /></button>
+                      </div>
+                    ) : (
+                      <>
+                        <span style={{ fontWeight: '600', color: '#1e293b' }}>{c.Nome}</span>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button className="action-btn edit" onClick={() => { setCatEditId(c.CategoriaId); setCatEditNome(c.Nome); }} title="Editar"><FiEdit3 /></button>
+                          <button className="action-btn delete" onClick={() => excluirCategoria(c.CategoriaId)} title="Excluir"><FiTrash2 /></button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         )}
 
-        {/* MODAL NOVO PRODUTO */}
         {isNovoProdutoModalOpen && (
           <div className="modal-overlay">
             <div className="modal-content fade-in">
-              <div className="modal-header"><h2>Cadastrar Novo Produto</h2><button className="modal-close-x" onClick={() => setIsNovoProdutoModalOpen(false)}><FiX /></button></div>
+              <div className="modal-header">
+                <h2>Novo Produto</h2>
+                <button className="modal-close-x" onClick={() => setIsNovoProdutoModalOpen(false)}><FiX /></button>
+              </div>
               <form onSubmit={salvarNovoProduto}>
                 <div className="form-group"><label>Nome</label><input type="text" required value={novoProduto.Nome} onChange={(e) => setNovoProduto({...novoProduto, Nome: e.target.value})} /></div>
                 <div className="form-row">
@@ -238,7 +290,7 @@ function Dashboard() {
                   <label>Categoria</label>
                   <select required value={novoProduto.CategoriaId} onChange={(e) => setNovoProduto({...novoProduto, CategoriaId: parseInt(e.target.value)})}>
                     <option value="">Selecione...</option>
-                    {categorias.map(c => <option key={c.CategoriaId} value={c.CategoriaId}>{c.Nome}</option>)}
+                    {categorias?.map(c => <option key={c.CategoriaId} value={c.CategoriaId}>{c.Nome}</option>)}
                   </select>
                 </div>
                 <div className="modal-footer"><button type="button" className="btn-cancel" onClick={() => setIsNovoProdutoModalOpen(false)}>Cancelar</button><button type="submit" className="btn-save-blue">Cadastrar</button></div>
@@ -247,35 +299,41 @@ function Dashboard() {
           </div>
         )}
 
-        {/* MODAL EDITAR */}
         {isEditModalOpen && (
           <div className="modal-overlay">
             <div className="modal-content fade-in">
-              <div className="modal-header"><h2>Editar Produto</h2><button className="modal-close-x" onClick={() => setIsEditModalOpen(false)}><FiX /></button></div>
+              <div className="modal-header">
+                <h2>Editar Produto</h2>
+                <button className="modal-close-x" onClick={() => setIsEditModalOpen(false)}><FiX /></button>
+              </div>
               <form onSubmit={salvarEdicao}>
-                <div className="form-group"><label>Nome</label><input type="text" value={itemSelecionado?.Nome} onChange={(e) => setItemSelecionado({...itemSelecionado, Nome: e.target.value})} /></div>
-                <div className="form-group"><label>Valor</label><input type="number" step="0.01" value={itemSelecionado?.Valor} onChange={(e) => setItemSelecionado({...itemSelecionado, Valor: parseFloat(e.target.value)})} /></div>
+                <div className="form-group"><label>Nome</label><input type="text" value={itemSelecionado?.Nome || ''} onChange={(e) => setItemSelecionado({...itemSelecionado, Nome: e.target.value})} /></div>
+                <div className="form-group"><label>Valor</label><input type="number" step="0.01" value={itemSelecionado?.Valor || 0} onChange={(e) => setItemSelecionado({...itemSelecionado, Valor: parseFloat(e.target.value)})} /></div>
                 <div className="modal-footer"><button type="button" className="btn-cancel" onClick={() => setIsEditModalOpen(false)}>Cancelar</button><button type="submit" className="btn-save-blue">Salvar</button></div>
               </form>
             </div>
           </div>
         )}
 
-        {/* MODAL EXCLUSÃO */}
         {isDeleteModalOpen && (
           <div className="modal-overlay">
             <div className="modal-confirm-new fade-in">
               <button className="modal-close-circle" onClick={() => setIsDeleteModalOpen(false)}><FiX /></button>
               <div className="confirm-icon-box"><FiTrash2 /></div>
               <h3>Confirmar Exclusão</h3>
-              <p>Tem certeza que deseja excluir este {tipoExclusao}?</p>
+              <p>Deseja mesmo excluir?</p>
               <h2 className="confirm-item-name">{itemSelecionado?.Nome}</h2>
-              <div className="confirm-actions"><button className="btn-cancel-gray" onClick={() => setIsDeleteModalOpen(false)}>Cancelar</button><button className="btn-confirm-red" onClick={confirmarExclusao}>Excluir</button></div>
+              <div className="confirm-actions">
+                <button className="btn-cancel-gray" onClick={() => setIsDeleteModalOpen(false)}>Cancelar</button>
+                <button className="btn-confirm-red" onClick={confirmarExclusao}>Excluir</button>
+              </div>
             </div>
           </div>
         )}
+
       </main>
     </div>
   );
 }
+
 export default Dashboard;
