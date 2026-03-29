@@ -194,10 +194,10 @@ function Dashboard() {
                     <td className="qtd-number">{p.Quantidade}</td>
                     <td>
                       <div className="stock-actions">
-                        <button className="action-btn add" onClick={() => alterarQtd(p.ProdutoId, 'add')}><FiPlusCircle /></button>
-                        <button className="action-btn sub" onClick={() => alterarQtd(p.ProdutoId, 'sub')}><FiMinusCircle /></button>
-                        <button className="action-btn edit" onClick={() => { setItemSelecionado(p); setIsEditModalOpen(true); }}><FiEdit3 /></button>
-                        <button className="action-btn delete" onClick={() => { setItemSelecionado(p); setTipoExclusao("produto"); setIsDeleteModalOpen(true); }}><FiTrash2 /></button>
+                        <button className="action-btn add" title="Aumentar quantidade" onClick={() => alterarQtd(p.ProdutoId, 'add')}><FiPlusCircle /></button>
+                        <button className="action-btn sub" title="Diminuir quantidade" onClick={() => alterarQtd(p.ProdutoId, 'sub')}><FiMinusCircle /></button>
+                        <button className="action-btn edit" title="Editar produto" onClick={() => { setItemSelecionado({...p}); setIsEditModalOpen(true); }}><FiEdit3 /></button>
+                        <button className="action-btn delete" title="Excluir produto" onClick={() => { setItemSelecionado(p); setTipoExclusao("produto"); setIsDeleteModalOpen(true); }}><FiTrash2 /></button>
                       </div>
                     </td>
                   </tr>
