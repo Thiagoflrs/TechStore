@@ -74,7 +74,7 @@
   height: 75px;
 }
 
-.remove-btn {
+.removed-btn {
   background: none;
   border: none;
   color: #888;
@@ -82,7 +82,7 @@
   transition: 0.2s;
 }
 
-.remove-btn:hover {
+.removed-btn:hover {
   color: #ff4d4d;
   transform: scale(1.1);
 }

@@ -1,20 +1,24 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Auth from "../pages/Auth/Auth";
-import Dashboard from "../pages/Dashboard/Dashboard";
-import Home from "../pages/Home/Home"; 
+import { paths } from "./paths.js"
+import Home from "../pages/Home/Home.jsx";
+import Auth from "../pages/Auth/Auth.jsx";
+import Payments from "../pages/Payments/Payments.jsx";
+import Product from "../pages/ProductDetails/ProductDetails.jsx";
+import Category from "../pages/Category/Category.jsx";
+import Dashboard from "../pages/Dashboard/Dashboard.jsx"
+
 
 function AppRoutes() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Auth />} />
-        <Route path="/register" element={<Auth />} />
-        
-        {/* Adicionei esta linha para evitar o erro "No routes matched" */}
-        <Route path="/Auth" element={<Auth />} />
-
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path={paths.public.home} element={<Home />} />
+        <Route path={paths.public.auth} element={<Auth />} />
+        <Route path={paths.public.payments} element={<Payments />} />
+        <Route path={paths.public.productDetails} element={<Product />} />
+        <Route path={paths.public.categoryName} element={<Category />} />
+        <Route path={paths.private.dashboard} element={<Dashboard />} />
+        <Route path="*" element={<Home />} />
       </Routes>
     </Router>
   );

@@ -24,7 +24,7 @@ function Home() {
       <SectionDivider images={[Banner1, Banner2]} />
       <ProductSection title="Smartphones" categoriasIds={[1]} />
       <SectionDivider images={[Banner3, Banner4, Banner5]} />
-      <ProductSection title="Acessórios" categoriasIds={[2, 9]} />
+      <ProductSection title="Acessórios" categoriasIds={[2, 9, 3]} />
       <RecommendedBrands title="Marcas Recomendadas" />
       <Footer />
     </>

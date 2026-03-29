@@ -85,7 +85,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                   </div>
                 </div>
                 <div className="item-actions">
-                  <button className="remove-btn" onClick={() => removeFromCart(item.id)}>
+                  <button className="removed-btn" onClick={() => removeFromCart(item.id)}>
                     <Trash2 size={18} />
                   </button>
                   <div className="quantity-control">
