@@ -31,7 +31,7 @@ function Dashboard() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/login");
+      navigate("/auth");
     } else {
       carregarDados();
     }
@@ -44,7 +44,7 @@ function Dashboard() {
     const safeFetch = async (url) => {
       try {
         const res = await fetch(url, { headers });
-        if (res.status === 401) { localStorage.clear(); navigate("/login"); return []; }
+        if (res.status === 401) { localStorage.clear(); navigate("/auth"); return []; }
         if (!res.ok) return []; 
         const data = await res.json();
         return data?.$values || (Array.isArray(data) ? data : []);
@@ -55,9 +55,9 @@ function Dashboard() {
 
     try {
       const [resProd, resCat, resUser] = await Promise.all([
-        safeFetch("http://localhost:5248/api/Produtos"),
-        safeFetch("http://localhost:5248/api/Categorias"),
-        safeFetch("http://localhost:5248/api/Usuarios")
+        safeFetch(`${import.meta.env.VITE_API_URL}/api/Produtos`),
+        safeFetch(`${import.meta.env.VITE_API_URL}/api/Categorias`),
+        safeFetch(`${import.meta.env.VITE_API_URL}/api/Usuarios`)
       ]);
 
       setProdutos(resProd || []);
@@ -73,7 +73,7 @@ function Dashboard() {
   const salvarNovoProduto = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-    await fetch("http://localhost:5248/api/Produtos", {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/Produtos`, {
       method: "POST",
       headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify(novoProduto)
@@ -86,7 +86,7 @@ function Dashboard() {
   const salvarEdicao = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-    await fetch(`http://localhost:5248/api/Produtos/${itemSelecionado.ProdutoId}`, {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/Produtos/${itemSelecionado.ProdutoId}`, {
       method: 'PUT',
       headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify(itemSelecionado)
@@ -104,7 +104,7 @@ function Dashboard() {
     
     setProdutos(prev => prev?.map(p => p.ProdutoId === id ? pAtu : p));
     
-    await fetch(`http://localhost:5248/api/Produtos/${id}`, { 
+    await fetch(`${import.meta.env.VITE_API_URL}/api/Produtos/${id}`, { 
       method: 'PUT', headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify(pAtu)
     });
@@ -113,8 +113,8 @@ function Dashboard() {
   const confirmarExclusao = async () => {
     const token = localStorage.getItem("token");
     const url = tipoExclusao === "produto" 
-      ? `http://localhost:5248/api/Produtos/${itemSelecionado.ProdutoId}` 
-      : `http://localhost:5248/api/Usuarios/${itemSelecionado.UsuarioId}`;
+      ? `${import.meta.env.VITE_API_URL}/api/Produtos/${itemSelecionado.ProdutoId}` 
+      : `${import.meta.env.VITE_API_URL}/api/Usuarios/${itemSelecionado.UsuarioId}`;
     await fetch(url, { method: 'DELETE', headers: { "Authorization": `Bearer ${token}` } });
     setIsDeleteModalOpen(false);
     carregarDados();
@@ -123,7 +123,7 @@ function Dashboard() {
   const salvarNovaCategoria = async () => {
     if (!novaCatNome.trim()) return;
     const token = localStorage.getItem("token");
-    await fetch("http://localhost:5248/api/Categorias", {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/Categorias`, {
       method: "POST", headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ Nome: novaCatNome })
     });
@@ -133,7 +133,7 @@ function Dashboard() {
 
   const excluirCategoria = async (id) => {
     const token = localStorage.getItem("token");
-    await fetch(`http://localhost:5248/api/Categorias/${id}`, { method: 'DELETE', headers: { "Authorization": `Bearer ${token}` } });
+    await fetch(`${import.meta.env.VITE_API_URL}/api/Categorias/${id}`, { method: 'DELETE', headers: { "Authorization": `Bearer ${token}` } });
     carregarDados();
   };
 
@@ -141,7 +141,7 @@ function Dashboard() {
     if (!catEditNome.trim()) return;
     const token = localStorage.getItem("token");
     try {
-      await fetch(`http://localhost:5248/api/Categorias/${id}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/Categorias/${id}`, {
         method: 'PUT',
         headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ CategoriaId: id, Nome: catEditNome })

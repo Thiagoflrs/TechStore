@@ -7,6 +7,7 @@ import samsung from "../../assets/images/brands/samsung.webp";
 import redragon from "../../assets/images/brands/redragon.webp";
 import acer from "../../assets/images/brands/acer.webp";
 import corsair from "../../assets/images/brands/corsair.webp";
+import hyperX from "../../assets/images/brands/hyperX.webp";
 
 const brands = [
   {
@@ -37,6 +38,10 @@ const brands = [
   {
     name: "Corsair",
     logo: corsair,
+  },
+    {
+    name: "HyperX",
+    logo: hyperX,
   },
 ];
 

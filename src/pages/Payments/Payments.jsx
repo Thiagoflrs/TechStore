@@ -50,7 +50,7 @@ function Pagamento() {
       if (user?.usuarioId && user?.usuarioId !== "null") {
         try {
           const response = await fetch(
-            `http://localhost:5248/api/Usuarios/GetInfoUsuario/${user.usuarioId}`,
+            `${import.meta.env.VITE_API_URL}/api/Usuarios/GetInfoUsuario/${user.usuarioId}`,
             {
               headers: { 
                 Authorization: `Bearer ${user.token}`,

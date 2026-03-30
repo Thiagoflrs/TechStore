@@ -1,5 +1,5 @@
 import { getImageById } from "../services/imageService"
-const API_URL = "http://localhost:5248/api/Produtos"
+const API_URL = `${import.meta.env.VITE_API_URL}/api/Produtos`
 
 export const mapProduto = (produto) => {
   return {

@@ -35,7 +35,7 @@ const mapCategories = (categories) => {
   };
 };
 
-const API_URL = "http://localhost:5248/api/Categorias";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/Categorias`;
 
 export const getCategories = async () => {
   try {

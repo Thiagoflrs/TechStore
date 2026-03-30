@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5248/api/Usuarios";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/Usuarios`;
 
 export const getUser = async (id, token) => {
   const response = await fetch(`${API_URL}/${id}`, {

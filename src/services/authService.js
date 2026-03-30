@@ -1,6 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 
-const API_URL = "http://localhost:5248/api/Usuarios";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/Usuarios`;
 
 export const login = async (email, senha) => {
   try {
@@ -76,6 +76,8 @@ export const logoutService = async () => {
   }
 };
 
+const aguardar = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const register = async (data) => {
   try {
     const [year, month, day] = data.birthDate.split("-");
@@ -114,6 +116,9 @@ export const register = async (data) => {
       const errorMsg = responseData?.Mensagem || responseText || "Erro ao cadastrar usuário";
       throw new Error(errorMsg);
     }
+
+    await aguardar(2500);
+
 
     return responseData;
   } catch (error) {
