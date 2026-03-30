@@ -51,7 +51,7 @@ function Pagamento() {
       if (user?.usuarioId && user?.usuarioId !== "null") {
         try {
           const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/Usuarios/GetInfoUsuario/${user.usuarioId}`,
+            `${import.meta.env.VITE_API_URL}/Usuarios/GetInfoUsuario/${user.usuarioId}`,
             {
               headers: { 
                 Authorization: `Bearer ${user.token}`,

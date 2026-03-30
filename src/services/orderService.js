@@ -8,7 +8,7 @@
   };
 
   export const createOrder = async (data) => {
-    const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/Pedidos/CriarPedido`, data, getAuthHeader());
+    const response = await axios.post(`${import.meta.env.VITE_API_URL}/Pedidos/CriarPedido`, data, getAuthHeader());
     return response.data;
   };
 
@@ -20,7 +20,7 @@
     try {
       if (metodosComPagamento.includes(tipoPagamento)) {
         await axios.post(
-          `${import.meta.env.VITE_API_URL}/api/PagamentoControllers/Processar/${pedidoId}`,
+          `${import.meta.env.VITE_API_URL}/PagamentoControllers/Processar/${pedidoId}`,
           { TipoPagamento: tipoPagamento },
           config
         );
@@ -29,7 +29,7 @@
       }
 
       const response = await axios.get(
-        `$${import.meta.env.VITE_API_URL}/api/Pedidos/ConcluirProcesssamento/${pedidoId}`,
+        `${import.meta.env.VITE_API_URL}/Pedidos/ConcluirProcesssamento/${pedidoId}`,
         config
       );
 

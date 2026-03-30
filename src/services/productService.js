@@ -15,7 +15,7 @@ export const mapProduto = (produto) => {
 
 export const getProdutos = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Produtos`);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/Produtos`);
 
     if (!response.ok) {
       throw new Error("Erro ao buscar produtos");
@@ -32,7 +32,7 @@ export const getProdutos = async () => {
 
 export const getProdutoById = async (id) => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Produtos/${id}`);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/Produtos/${id}`);
 
     if (!response.ok) {
       throw new Error("Erro ao buscar o produto");

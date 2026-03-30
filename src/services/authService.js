@@ -2,7 +2,7 @@ import { jwtDecode } from "jwt-decode";
 
 export const login = async (email, senha) => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Usuarios/login`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/Usuarios/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, senha }),
@@ -49,7 +49,7 @@ export const logoutService = async () => {
   if (!token) return;
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Usuarios/logout`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/Usuarios/logout`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -95,7 +95,7 @@ export const register = async (data) => {
             : "OUTRO",
     };
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Usuarios`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/Usuarios`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

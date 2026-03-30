@@ -35,7 +35,7 @@ function Header() {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Usuarios/GetInfoUsuario/${user.usuarioId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/Usuarios/GetInfoUsuario/${user.usuarioId}`, {
         method: 'GET',
         headers: { 
           Authorization: `Bearer ${user.token}`,
