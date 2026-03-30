@@ -1,7 +1,5 @@
 import { getImageById } from "../services/imageService";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 export const mapProduto = (produto) => {
   return {
     id: produto.ProdutoId,
@@ -17,7 +15,7 @@ export const mapProduto = (produto) => {
 
 export const getProdutos = async () => {
   try {
-    const response = await fetch(`${API_URL}/api/Produtos`);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Produtos`);
 
     if (!response.ok) {
       throw new Error("Erro ao buscar produtos");
@@ -34,7 +32,7 @@ export const getProdutos = async () => {
 
 export const getProdutoById = async (id) => {
   try {
-    const response = await fetch(`${API_URL}/api/Produtos/${id}`);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Produtos/${id}`);
 
     if (!response.ok) {
       throw new Error("Erro ao buscar o produto");
