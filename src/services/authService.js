@@ -97,7 +97,7 @@ export const register = async (data) => {
             : "OUTRO",
     };
 
-    const response = await fetch(`${API_URL}`, {
+    const response = await fetch(`${API_URL}/api/Usuarios`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

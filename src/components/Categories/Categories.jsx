@@ -34,48 +34,50 @@ function Categories({ title }) {
       {loading ? (
         <p>Carregando categorias...</p>
       ) : (
-        <Swiper
-          modules={[Navigation, Autoplay]}
-          spaceBetween={20}
-          slidesPerView={8}
-          centeredSlides={true}
-          navigation
-          loop={true}
-          speed={3000}
-          allowTouchMove={true}
-          autoplay={{
-            delay: 0,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true,
-          }}
-          breakpoints={{
-            320: { slidesPerView: 2 },
-            640: { slidesPerView: 3 },
-            900: { slidesPerView: 5 },
-            1200: { slidesPerView: 6.2 },
-          }}
-          className="categories-container"
-        >
-          {infiniteCategories.map((cat, index) => {
-            const Icon = cat.icon;
+        categories.length > 0 && (
+          <Swiper
+            modules={[Navigation, Autoplay]}
+            spaceBetween={20}
+            slidesPerView={8}
+            centeredSlides={true}
+            navigation
+            loop={true}
+            speed={3000}
+            allowTouchMove={true}
+            autoplay={{
+              delay: 0,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true,
+            }}
+            breakpoints={{
+              320: { slidesPerView: 2 },
+              640: { slidesPerView: 3 },
+              900: { slidesPerView: 5 },
+              1200: { slidesPerView: 6.2 },
+            }}
+            className="categories-container"
+          >
+            {infiniteCategories.map((cat, index) => {
+              const Icon = cat.icon;
 
-            return (
-              <SwiperSlide key={`${cat.id || cat.name}-${index}`}>
-                <Link
-                  to={`/categoria/${cat.name}`}
-                  style={{ textDecoration: "none", color: "inherit" }}
-                >
-                  <div className="category-item">
-                    <div className="category-card">
-                      <Icon className="category-icon" size={32} />
+              return (
+                <SwiperSlide key={`${cat.id || cat.name}-${index}`}>
+                  <Link
+                    to={`/categoria/${cat.name}`}
+                    style={{ textDecoration: "none", color: "inherit" }}
+                  >
+                    <div className="category-item">
+                      <div className="category-card">
+                        <Icon className="category-icon" size={32} />
+                      </div>
+                      <span className="category-name">{cat.name}</span>
                     </div>
-                    <span className="category-name">{cat.name}</span>
-                  </div>
-                </Link>
-              </SwiperSlide>
-            );
-          })}
-        </Swiper>
+                  </Link>
+                </SwiperSlide>
+              );
+            })}
+          </Swiper>
+        )
       )}
     </section>
   );
