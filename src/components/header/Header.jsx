@@ -19,7 +19,7 @@ function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [perfil, setPerfil] = useState(null);
   const [tipoPerfil, setTipoPerfil] = useState(null);
-
+  
   const hasFetched = useRef(false);
 
   useEffect(() => {

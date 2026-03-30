@@ -18,7 +18,7 @@ function Dashboard() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
   const [isNovoProdutoModalOpen, setIsNovoProdutoModalOpen] = useState(false);
-  
+
   const [itemSelecionado, setItemSelecionado] = useState(null);
   const [tipoExclusao, setTipoExclusao] = useState(""); 
   

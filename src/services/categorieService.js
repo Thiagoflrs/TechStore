@@ -35,11 +35,11 @@ const mapCategories = (categories) => {
   };
 };
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/Categorias`;
+const API_URL = `${import.meta.env.VITE_API_URL}`;
 
 export const getCategories = async () => {
   try {
-    const response = await fetch(API_URL);
+    const response = await fetch(`${API_URL}/api/Categorias`);
     if (!response.ok) {
       throw new Error("Erro ao buscar categorias");
     }
@@ -54,7 +54,7 @@ export const getCategories = async () => {
 export const getCategoryWithProducts = async (categoryName) => {
   try {
     const response = await fetch(
-      `${API_URL}/withproduct?name=${encodeURIComponent(categoryName)}`
+      `${API_URL}/api/Categorias/withproduct?name=${encodeURIComponent(categoryName)}`
     );
     if (!response.ok) {
       throw new Error("Erro ao buscar produtos da categoria");

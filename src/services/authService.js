@@ -1,10 +1,10 @@
 import { jwtDecode } from "jwt-decode";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/Usuarios`;
+const API_URL = `${import.meta.env.VITE_API_URL}`;
 
 export const login = async (email, senha) => {
   try {
-    const response = await fetch(`${API_URL}/login`, {
+    const response = await fetch(`${API_URL}/api/Usuarios/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, senha }),
@@ -51,7 +51,7 @@ export const logoutService = async () => {
   if (!token) return;
 
   try {
-    const response = await fetch(`${API_URL}/logout`, {
+    const response = await fetch(`${API_URL}/api/Usuarios/logout`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

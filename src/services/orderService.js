@@ -1,7 +1,7 @@
   import axios from "axios";
 
-  const API_URL = `${import.meta.env.VITE_API_URL}/api/Pedidos`;
-  const API_URL_PAGAMENTO = `${import.meta.env.VITE_API_URL}/api/PagamentoControllers/Processar`;
+  const API_URL = `${import.meta.env.VITE_API_URL}`;
+  const API_URL_PAGAMENTO = `${import.meta.env.VITE_API_URL}`;
 
   const aguardarProcessamento = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -11,7 +11,7 @@
   };
 
   export const createOrder = async (data) => {
-    const response = await axios.post(`${API_URL}/CriarPedido`, data, getAuthHeader());
+    const response = await axios.post(`${API_URL}/api/Pedidos/CriarPedido`, data, getAuthHeader());
     return response.data;
   };
 
@@ -23,7 +23,7 @@
     try {
       if (metodosComPagamento.includes(tipoPagamento)) {
         await axios.post(
-          `${API_URL_PAGAMENTO}/${pedidoId}`,
+          `${API_URL_PAGAMENTO}/api/PagamentoControllers/Processar/${pedidoId}`,
           { TipoPagamento: tipoPagamento },
           config
         );
@@ -32,7 +32,7 @@
       }
 
       const response = await axios.get(
-        `${API_URL}/ConcluirProcesssamento/${pedidoId}`,
+        `${API_URL}/api/Pedidos/ConcluirProcesssamento/${pedidoId}`,
         config
       );
 

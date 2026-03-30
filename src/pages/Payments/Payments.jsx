@@ -45,12 +45,14 @@ function Pagamento() {
     data: { valid: null },
   });
 
+  const API_URL = `${import.meta.env.VITE_API_URL}`;
   useEffect(() => {
     const buscarSaldo = async () => {
+
       if (user?.usuarioId && user?.usuarioId !== "null") {
         try {
           const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/Usuarios/GetInfoUsuario/${user.usuarioId}`,
+            `${API_URL}/api/Usuarios/GetInfoUsuario/${user.usuarioId}`,
             {
               headers: { 
                 Authorization: `Bearer ${user.token}`,
